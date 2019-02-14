@@ -2,6 +2,11 @@ console.log('starting henlo');
 var express = require('express');
 var app = express();
 var taters = require('./taters.json');
+var bodyParser = require('body-parser');
+
+
+app.use(express.urlencoded({extended: false}));
+app.use(express.static('static'));
 
 app.get('/', function(req, resp) {
     resp.send('hello world');
@@ -27,6 +32,11 @@ app.get('/taters', function(req, resp) {
         }
     }
     resp.send(response);
+})
+
+app.post('/new', function(req, resp) {
+    taters.push({'title': req.body.title, 'href': req.body.href, 'ingredients': req.body.ingredients, 'thumbnail': req.body.thumbnail});
+    resp.send('successfully added ' + req.body.title + ' to recipes');
 })
 
 app.get('*', function(req, resp) {
