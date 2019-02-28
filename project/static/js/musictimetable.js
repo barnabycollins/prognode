@@ -1,5 +1,3 @@
-/* global $ */
-
 var moment = require('moment');
 var rows = [];
 var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
