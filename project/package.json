@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "start-dev": "start nodemon server.js && start watchify -p tinyify static/js/musictimetable.js -o static/js/bundle.js"
   },
   "author": "Barnaby Collins",
   "license": "ISC",
@@ -16,6 +17,8 @@
   "devDependencies": {
     "browserify": "^16.2.3",
     "eslint": "^5.14.1",
-    "nodemon": "^1.18.10"
+    "nodemon": "^1.18.10",
+    "tinyify": "^2.5.0",
+    "watchify": "^3.11.1"
   }
 }
