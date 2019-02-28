@@ -4,12 +4,14 @@
   "description": "An app to enable online bookings for Cuth's music room",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
   },
   "author": "Barnaby Collins",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "eslint": "^5.14.1",
