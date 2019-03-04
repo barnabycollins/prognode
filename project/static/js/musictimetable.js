@@ -174,6 +174,7 @@ function hideLoad() {
 	$('#loading-screen').remove();
 }
 // define function for sorting bookings by date booking was made (to determine priority)
+// repeated items take priority
 var sortByDates = function(row1, row2) {
 	if (row1[1] == 'REPEATED') return -1;
 	if (row2[1] == 'REPEATED') return 1;
