@@ -42,6 +42,8 @@ class Booking {
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(STime, ETime, name, id, recurrence) {
+	var id = parseInt(id);
+	var recurrencedict = {'true': true, 'false': false};
 	var haveUser = false;
 	for (i = 0; i < users.length; i++) {
 		if (users[i].id == id) {
@@ -51,7 +53,7 @@ function createBooking(STime, ETime, name, id, recurrence) {
 	if (!haveUser) {
 		users.push(new User(id, 0));
 	}
-	bookings.push(new Booking(Date.now(), STime, ETime, name, id, recurrence));
+	bookings.push(new Booking(Date.now(), STime, ETime, name, id, recurrencedict[recurrence]));
 }
 
 
@@ -70,12 +72,16 @@ app.get('/', function(req, resp) {
 
 /* GETTING BOOKINGS */
 app.get('/bookings', function(req, resp) {
-	resp.send('bookings will be here');
+	resp.send(bookings);
+});
+
+app.get('/users', function(req, resp) {
+	resp.send(users);
 });
 
 /* NEW BOOKING */
 app.post('/new', function(req, resp) {
-	createBooking(req.body.time, req.body.name, req.body.id, req.body.recurrence);
+	createBooking(req.body.stime, req.body.etime, req.body.name, req.body.id, req.body.recurrence);
 	resp.send('Successfully added your booking to the database.');
 });
 
