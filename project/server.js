@@ -1,16 +1,17 @@
 class User {
 	/**
 	* Class for a user
-	* @param {??} id user's id
 	* @param {string} name user's name
 	* @param {number} permissionLevel the permission level of the user
 	*/
-	constructor (id, name, permissionLevel) {
-		this.id = id;
+	constructor (name, permissionLevel) {
 		this.name = name
 		this.permissionLevel = permissionLevel;
 	}
 }
+
+var UserList = {};
+UserList[1337] = new User('Barnaby Collins', 9);
 
 /**
 * Add or update user entry
@@ -18,15 +19,10 @@ class User {
 * @param {string} name name to give to the user
 */
 function updateUser(id, name) {
-	var haveUser = false;
-	for (i = 0; i < users.length; i++) {
-		if (users[i].id == id) {
-			haveUser = true;
-			users[i].name = name;
-		}
-	}
-	if (!haveUser) {
-		users.push(new User(id, name, 0));
+	if (id in UserList) {
+		UserList[id].name = name;
+	} else {
+		userList[id] = new User(name, 0);
 	}
 }
 
@@ -36,15 +32,13 @@ class Booking {
 	* @param {number} booktime unix timestamp for the time the booking was made (used for priority)
 	* @param {object} STime JS Date object representing the start time of the booking
 	* @param {object} ETime JS Date object representing the end time of the booking
-	* @param {string} name the name to display on that booking
 	* @param {??} id the user id of the person that made the booking
 	* @param {boolean} recurrence whether or not the booking will recur every week
 	*/
-	constructor(booktime, STime, ETime, name, id, recurrence) {
+	constructor(booktime, STime, ETime, id, recurrence) {
 		this.booktime = booktime;
 		this.STime = STime;
 		this.ETime = ETime;
-		this.name = name;
 		this.id = id;
 		this.recurrence = recurrence;
 	}
@@ -59,23 +53,13 @@ class Booking {
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(STime, ETime, name, id, recurrence) {
-	var id = parseInt(id);
 	var recurrencedict = {'true': true, 'false': false};
-	var haveUser = false;
-	for (i = 0; i < users.length; i++) {
-		if (users[i].id == id) {
-			haveUser = true;
-			name = users[i].name;
-		}
+	if (!(id in UserList)) {
+		UserList[id] = new User(name, 0);
 	}
-	if (!haveUser) {
-		users.push(new User(id, name, 0));
-	}
-	bookings.push(new Booking(Date.now(), STime, ETime, name, id, recurrencedict[recurrence]));
+	bookings.push(new Booking(Date.now(), STime, ETime, id, recurrencedict[recurrence]));
 }
 
-
-var users = [new User(1337, 'Barnaby Collins', 9)];
 var bookings = [];
 
 
@@ -94,12 +78,18 @@ app.get('/', function(req, resp) {
 
 /* GETTING BOOKINGS */
 app.get('/bookings', function(req, resp) {
-	resp.send(bookings);
+	content = [];
+	for (i = 0; i < bookings.length; i++) {
+		var j = bookings[i];
+		j['name'] = UserList[j.id].name;
+		content.push(j);
+	}
+	resp.send(content);
 });
 
 /* GETTING USER LIST */
 app.get('/users', function(req, resp) {
-	resp.send(users);
+	resp.send(UserList);
 });
 
 /* ADD OR UPDATE USER ENTRY */
