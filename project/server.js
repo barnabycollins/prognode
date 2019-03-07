@@ -5,7 +5,7 @@ class User {
 	* @param {number} permissionLevel the permission level of the user
 	*/
 	constructor (name, permissionLevel) {
-		this.name = name
+		this.name = name;
 		this.permissionLevel = permissionLevel;
 	}
 }
@@ -22,7 +22,7 @@ function updateUser(id, name) {
 	if (id in UserList) {
 		UserList[id].name = name;
 	} else {
-		userList[id] = new User(name, 0);
+		UserList[id] = new User(name, 0);
 	}
 }
 
@@ -46,27 +46,26 @@ class Booking {
 
 /**
 * Create new booking
-* @param {object} STime JS Date object representing the start time of the booking
-* @param {object} ETime JS Date object representing the end time of the booking
+* @param {object} STime JS Date.toString() object representing the start time of the booking
+* @param {object} ETime JS Date.toString() object representing the end time of the booking
 * @param {string} name the name to display on that booking
 * @param {??} id the user id of the person that made the booking
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(STime, ETime, name, id, recurrence) {
-	var recurrencedict = {'true': true, 'false': false};
+	var recurrencedict = {'1': true, '0': false};
 	if (!(id in UserList)) {
 		UserList[id] = new User(name, 0);
 	}
-	bookings.push(new Booking(Date.now(), STime, ETime, id, recurrencedict[recurrence]));
+	bookings.push(new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), parseInt(id), recurrencedict[recurrence]));
 }
 
 var bookings = [];
-
+createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', 80, '0');
 
 // NODE SERVER
 var express = require('express');
 var app = express();
-
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.static('static'));
@@ -78,10 +77,11 @@ app.get('/', function(req, resp) {
 
 /* GETTING BOOKINGS */
 app.get('/bookings', function(req, resp) {
-	content = [];
-	for (i = 0; i < bookings.length; i++) {
-		var j = bookings[i];
+	var content = [];
+	for (var i = 0; i < bookings.length; i++) {
+		var j = Object.assign({}, bookings[i]);
 		j['name'] = UserList[j.id].name;
+		delete j.id;
 		content.push(j);
 	}
 	resp.send(content);
