@@ -16,7 +16,6 @@
   },
   "devDependencies": {
     "browserify": "^16.2.3",
-    "eslint": "^5.14.1",
     "nodemon": "^1.18.10",
     "tinyify": "^2.5.0",
     "watchify": "^3.11.1"

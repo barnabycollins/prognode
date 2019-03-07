@@ -11,6 +11,9 @@ body {
 #timetable-header th {
     text-align: center;
 }
+td {
+    word-wrap: break-word;
+}
 #form-frame {
     height: 0px;
     transition: height 1s ease;

@@ -1,3 +1,6 @@
+var moment = require('moment');
+var express = require('express');
+
 class User {
 	/**
 	* Class for a user
@@ -54,17 +57,75 @@ class Booking {
 */
 function createBooking(STime, ETime, name, id, recurrence) {
 	var recurrencedict = {'1': true, '0': false};
+	
+	// add the user to the user database if we haven't already
 	if (!(id in UserList)) {
 		UserList[id] = new User(name, 0);
 	}
-	bookings.push(new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), parseInt(id), recurrencedict[recurrence]));
+
+	// check if the start date is the same as the end date
+	if (moment(STime).dayOfYear() != moment(ETime).dayOfYear() || moment(STime).year() != moment(ETime).year()) {
+		return false;
+	}
+
+	// make booking object
+	var toAdd = new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), parseInt(id), recurrencedict[recurrence]);
+
+	// if the booking doesn't clash, add it to bookings
+	if (registerBooking(toAdd)) {
+		bookings.push(toAdd);
+	}
+	// otherwise, return false
+	else {
+		return false;
+	}
+	
+	// if we completed successfully, return true
+	return true;
+}
+
+
+// object to store what times are booked so we can check for clashes
+var bookedTimes = {};
+
+/**
+ * Register booking to bookedTimes
+ * @param {object} booking booking to add
+ */
+function registerBooking(booking) {
+	var bookingtimes = [moment(booking.STime), moment(booking.ETime)];
+	var year = bookingtimes[0].year();
+	var day = bookingtimes[0].dayOfYear();
+	
+	// if we haven't yet got an entry for the year, add one for the year and day
+	if (bookedTimes[year] == undefined) {
+		bookedTimes[year] = {};
+		bookedTimes[year][day] = {};
+	}
+	// if we haven't yet got an entry for the day, add one for it
+	else if (bookedTimes[year][day] == undefined) {
+		bookedTimes[year][day] = {};
+	}
+	// for each hour of the booking
+	for (var j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
+		// if we don't yet have anything else booked then, 
+		if (!bookedTimes[year][day][j]) {
+			bookedTimes[year][day][j] = true;
+		}
+		else {
+			for (var k = bookingtimes[0].hour(); k < j; k++) {
+				delete bookedTimes[year][day][j];
+			}
+			return false;
+		}
+	}
+	return true;
 }
 
 var bookings = [];
 createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', 80, '0');
 
 // NODE SERVER
-var express = require('express');
 var app = express();
 
 app.use(express.urlencoded({extended: false}));
@@ -100,8 +161,12 @@ app.post('/updateuser', function(req, resp) {
 
 /* NEW BOOKING */
 app.post('/new', function(req, resp) {
-	createBooking(req.body.stime, req.body.etime, req.body.name, req.body.id, req.body.recurrence);
-	resp.send('Successfully added your booking to the database.');
+	if (createBooking(req.body.stime, req.body.etime, req.body.name, req.body.id, req.body.recurrence)) {
+		resp.send('Successfully added your booking to the database.');
+	}
+	else {
+		resp.status(409).send('Failed to add your booking, likely because of a clash with someone else\'s booking. Please check the timetable!');
+	}
 });
 
 /* OTHERWISE */
