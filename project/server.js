@@ -63,8 +63,17 @@ function createBooking(STime, ETime, name, id, recurrence) {
 		UserList[id] = new User(name, 0);
 	}
 
-	// check if the start date is the same as the end date
-	if (moment(STime).dayOfYear() != moment(ETime).dayOfYear() || moment(STime).year() != moment(ETime).year()) {
+	var start = moment(STime);
+	var end = moment(ETime);
+	var mintime = start.clone().hour(10);
+	var maxtime = start.clone().hour(22);
+
+	// make sure that both start and end land in the range of 10 til 10 on the date of the start time
+	if (!(start.isBetween(mintime, maxtime, 'hour', '[]') && end.isBetween(mintime, maxtime, 'year', '[]'))) {
+		return false;
+	}
+	// make sure end is after start (and the session spans at least one hour)
+	else if (end.hour() <= start.hour()) {
 		return false;
 	}
 
@@ -167,7 +176,7 @@ app.post('/new', function(req, resp) {
 		resp.send('Successfully added your booking to the database.');
 	}
 	else {
-		resp.status(409).send('Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable!');
+		resp.status(409).send('Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
 	}
 });
 
