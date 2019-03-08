@@ -80,9 +80,16 @@ function createBooking(STime, ETime, name, id, recurrence) {
 	// make booking object
 	var toAdd = new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), parseInt(id), recurrencedict[recurrence]);
 
+	var bookId = bookingnum;
+	if (bookingpool.length > 0) {
+		bookId = bookingpool.shift();
+	}
+	else {
+		bookingnum += 1;
+	}
 	// if the booking doesn't clash, add it to bookings
-	if (registerBooking(toAdd)) {
-		bookings.push(toAdd);
+	if (registerBooking(toAdd, bookId)) {
+		bookings[bookId] = toAdd;
 	}
 	// otherwise, return false
 	else {
@@ -100,8 +107,9 @@ var bookedTimes = {};
 /**
  * Register booking to bookedTimes
  * @param {object} booking booking to add
+ * @param {number} id id to give to the booking
  */
-function registerBooking(booking) {
+function registerBooking(booking, id) {
 	var bookingtimes = [moment(booking.STime), moment(booking.ETime)];
 	var year = bookingtimes[0].year();
 	var day = bookingtimes[0].dayOfYear();
@@ -119,21 +127,68 @@ function registerBooking(booking) {
 	for (var j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
 		// if we don't yet have anything else booked then, remember it's booked now
 		if (!bookedTimes[year][day][j]) {
-			bookedTimes[year][day][j] = true;
+			bookedTimes[year][day][j] = id;
 		}
-		// if there's a clash, remove previous entries and return a failure
+		// if there's a clash
 		else {
-			for (var k = bookingtimes[0].hour(); k < j; k++) {
-				delete bookedTimes[year][day][j];
+			// if the clashing booking belongs to the same user as the booking being added
+			if (bookings[bookedTimes[year][day][j]].id == booking.id) {
+				// remove that booking and continue adding the current booking
+				removeBooking(bookedTimes[year][day][j]);
+				bookedTimes[year][day][j] = id;
 			}
-			return false;
+			else {
+				// if it belongs to someone else
+				for (var k = bookingtimes[0].hour(); k < j; k++) {
+					// remove past entries in bookedTimes and put the id back in the bookingpool
+					delete bookedTimes[year][day][j];
+					bookingpool.push(id);
+				}
+				// return a failure
+				return false;
+			}
 		}
 	}
 	// if we successfully made a booking, return success
 	return true;
 }
 
-var bookings = [];
+/**
+ * Removes a booking from bookings and bookedTimes
+ * @param {number} id 
+ */
+function removeBooking(id) {
+	if (!(id in bookings)) {
+		return false;
+	}
+	var booking = bookings[id];
+	var bookingtimes = [moment(booking.STime), moment(booking.ETime)];
+	var year = bookingtimes[0].year();
+	var day = bookingtimes[0].dayOfYear();
+
+	for (var i = bookingtimes[0].hour(); i < bookingtimes[1].hour(); i++) {
+		delete bookedTimes[year][day][i];
+	}
+
+	// tidy up any empty entries in bookedTimes
+	if (Object.keys(bookedTimes[year][day]).length == 0) {
+		delete bookedTimes[year][day];
+
+		if (Object.keys(bookedTimes[year]).length == 0) {
+			delete bookedTimes[year];
+		}
+	}
+
+	// remove booking from bookings database and release the id back to the pool
+	delete bookings[id];
+	bookingpool.push(id);
+
+	return true;
+}
+
+var bookings = {};		// object to store bookings in
+var bookingnum = 1;		// counter to store the current booking index
+var bookingpool = [];	// queue to store the pool of free booking numbers
 createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', 80, '0');
 
 // NODE SERVER
@@ -178,6 +233,21 @@ app.post('/new', function(req, resp) {
 	else {
 		resp.status(409).send('Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
 	}
+});
+
+app.post('/remove', function(req, resp) {
+	if (removeBooking(req.body.id)) {
+		resp.send('Successfully removed booking ' + req.body.id);
+	}
+	else {
+		resp.send('Booking ' + req.body.id +' did not exist in the first place');
+	}
+});
+
+/* DEBUG: GET FULL STATE */
+app.get('/all', function(req, resp) {
+	var body = {'bookings': bookings, 'bookedTimes': bookedTimes, 'bookingnum': bookingnum, 'bookingpool': bookingpool, 'UserList': UserList};
+	resp.send(body);
 });
 
 /* OTHERWISE */
