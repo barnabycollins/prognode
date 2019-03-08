@@ -65,11 +65,11 @@ function createBooking(STime, ETime, name, id, recurrence) {
 
 	var start = moment(STime);
 	var end = moment(ETime);
-	var mintime = start.clone().hour(10);
-	var maxtime = start.clone().hour(22);
+	var mintime = start.clone().hour(10).minute(0).second(0).millisecond(0);
+	var maxtime = start.clone().hour(22).minute(0).second(0).millisecond(0);
 
 	// make sure that both start and end land in the range of 10 til 10 on the date of the start time
-	if (!(start.isBetween(mintime, maxtime, 'hour', '[]') && end.isBetween(mintime, maxtime, 'year', '[]'))) {
+	if (!(start.isBetween(mintime, maxtime, null, '[]') && end.isBetween(mintime, maxtime, null, '[]'))) {
 		return false;
 	}
 	// make sure end is after start (and the session spans at least one hour)
