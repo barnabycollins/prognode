@@ -108,10 +108,11 @@ function registerBooking(booking) {
 	}
 	// for each hour of the booking
 	for (var j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
-		// if we don't yet have anything else booked then, 
+		// if we don't yet have anything else booked then, remember it's booked now
 		if (!bookedTimes[year][day][j]) {
 			bookedTimes[year][day][j] = true;
 		}
+		// if there's a clash, remove previous entries and return a failure
 		else {
 			for (var k = bookingtimes[0].hour(); k < j; k++) {
 				delete bookedTimes[year][day][j];
@@ -119,6 +120,7 @@ function registerBooking(booking) {
 			return false;
 		}
 	}
+	// if we successfully made a booking, return success
 	return true;
 }
 
@@ -165,7 +167,7 @@ app.post('/new', function(req, resp) {
 		resp.send('Successfully added your booking to the database.');
 	}
 	else {
-		resp.status(409).send('Failed to add your booking, likely because of a clash with someone else\'s booking. Please check the timetable!');
+		resp.status(409).send('Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable!');
 	}
 });
 
