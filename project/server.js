@@ -191,22 +191,34 @@ var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
 createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', 80, '0');
 
+const CLIENT_ID = '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com';
+
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client(CLIENT_ID);
+async function verify(token) {
+	const ticket = await client.verifyIdToken({
+		idToken: token,
+		audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+		// Or, if multiple clients access the backend:
+		//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+	});
+	const payload = await ticket.getPayload();
+	const userid = payload['sub'];
+	return userid;
+}
+
 // NODE SERVER
 var app = express();
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.static('static'));
 
-/* ROOT */
-app.get('/', function(req, resp) {
-	resp.send('hello world');
-});
-
 /* GETTING BOOKINGS */
 app.get('/bookings', function(req, resp) {
 	var content = [];
-	for (var i = 0; i < bookings.length; i++) {
-		var j = Object.assign({}, bookings[i]);
+	for (var i = 0; i < Object.keys(bookings).length; i++) {
+		// j = current booking object
+		var j = Object.assign({}, bookings[Object.keys(bookings)[i]]);
 		j['name'] = UserList[j.id].name;
 		delete j.id;
 		content.push(j);
@@ -235,6 +247,7 @@ app.post('/new', function(req, resp) {
 	}
 });
 
+/* REMOVE BOOKING */
 app.post('/remove', function(req, resp) {
 	if (removeBooking(req.body.id)) {
 		resp.send('Successfully removed booking ' + req.body.id);
@@ -248,6 +261,12 @@ app.post('/remove', function(req, resp) {
 app.get('/all', function(req, resp) {
 	var body = {'bookings': bookings, 'bookedTimes': bookedTimes, 'bookingnum': bookingnum, 'bookingpool': bookingpool, 'UserList': UserList};
 	resp.send(body);
+});
+
+/* GOOGLE SIGNIN */
+app.post('/signin', async function(req, resp) {
+	var userid = await verify(req.body.idtoken);
+	resp.send(userid);
 });
 
 /* OTHERWISE */

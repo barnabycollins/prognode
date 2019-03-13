@@ -1,42 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Cuth's Music Room Bookings</title>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<meta charset="UTF-8">
+	<meta name="google-signin-client_id" content="149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com">
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
+	<title>Cuth's Music Room Bookings</title>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 </head>
 <body>
-    <div class="container">
-        <br>
-        <h1>Cuth's Music Room Bookings</h1>
-        <div class="d-md-none">
-            Scroll sideways to see more days.
-        </div>
-        <br>
-        <div id="timetable-container" class="content-div"> <!--  -->
-            Loading data...
-        </div>
-        <div id="clash-container" class="content-div"></div>
-        <div id="signup-frame">
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdfUhoY_MvmaXiQdSosrtqfYVBfm-BHYK7Zz-P3ndjkHnkjmQ/viewform" width="100%" id="form-frame" style="display: none;"></iframe><a href="https://docs.google.com/spreadsheets/d/1ahUx8eR7WGad9xp52JUnvg8BQRwe0tFZckj3ZV_YyNU/edit#gid=1773535615">database</a><br><br>
-        </div>
-    </div>
+	<div class="container">
+		<br>
+		<h1>Cuth's Music Room Bookings</h1>
+		<div class="d-md-none">
+			Scroll sideways to see more days.
+		</div>
+		<br>
+		<div id="timetable-container" class="content-div">
+			Loading data...
+		</div>
+		<div id="clash-container" class="content-div"></div>
+		<div class="g-signin2" data-onsuccess="onSignIn"></div>
+	</div>
 
-    <footer>
-        <div class="container">
-            Designed and built by Barnaby Collins.
-        </div>
-    </footer>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    <script src="js/bundle.js"></script>
-    <div id="loading-screen">
-        <div>
-            Loading...
-        </div>
-    </div>
+	<script>
+		/* eslint-disable */
+		function onSignIn(googleUser) {
+			var profile = googleUser.getBasicProfile();
+			var id_token = googleUser.getAuthResponse().id_token;
+			console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+			console.log('Name: ' + profile.getName());
+			console.log('Image URL: ' + profile.getImageUrl());
+			console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '/signin');
+			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+			xhr.onload = function() {
+			console.log('Signed in as: ' + xhr.responseText);
+			};
+			xhr.send('idtoken=' + id_token);
+		}
+		/* eslint-enable */
+	</script>
+
+	<footer>
+		<div class="container">
+			Designed and built by Barnaby Collins.
+		</div>
+	</footer>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+	<script src="js/bundle.js"></script>
+	<div id="loading-screen">
+		<div>
+			Loading...
+		</div>
+	</div>
 </body>
 </html>
