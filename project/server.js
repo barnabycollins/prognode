@@ -6,15 +6,17 @@ class User {
 	* Class for a user
 	* @param {string} name user's name
 	* @param {number} permissionLevel the permission level of the user
+	* @param {string} email user's email
 	*/
-	constructor (name, permissionLevel) {
+	constructor (name, permissionLevel, email) {
 		this.name = name;
 		this.permissionLevel = permissionLevel;
+		this.email = email;
 	}
 }
 
 var UserList = {};
-UserList[1337] = new User('Barnaby Collins', 9);
+UserList[1337] = new User('Barnaby Collins', 9, 'barnstormer322@gmail.com');
 
 /**
 * Add or update user entry
@@ -24,7 +26,8 @@ UserList[1337] = new User('Barnaby Collins', 9);
 function updateUser(id, name) {
 	if (id in UserList) {
 		UserList[id].name = name;
-	} else {
+	}
+	else {
 		UserList[id] = new User(name, 0);
 	}
 }
@@ -35,7 +38,7 @@ class Booking {
 	* @param {number} booktime unix timestamp for the time the booking was made (used for priority)
 	* @param {object} STime JS Date object representing the start time of the booking
 	* @param {object} ETime JS Date object representing the end time of the booking
-	* @param {??} id the user id of the person that made the booking
+	* @param {string} id the user id of the person that made the booking
 	* @param {boolean} recurrence whether or not the booking will recur every week
 	*/
 	constructor(booktime, STime, ETime, id, recurrence) {
@@ -52,15 +55,15 @@ class Booking {
 * @param {object} STime JS Date.toString() object representing the start time of the booking
 * @param {object} ETime JS Date.toString() object representing the end time of the booking
 * @param {string} name the name to display on that booking
-* @param {??} id the user id of the person that made the booking
+* @param {string} id the user id of the person that made the booking
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
-function createBooking(STime, ETime, name, id, recurrence) {
+function createBooking(STime, ETime, name, id, recurrence, email) {
 	var recurrencedict = {'on': true, 'off': false};
 	
 	// add the user to the user database if we haven't already
 	if (!(id in UserList)) {
-		UserList[id] = new User(name, 0);
+		UserList[id] = new User(name, 0, email);
 	}
 
 	var start = moment(STime);
@@ -154,13 +157,19 @@ function registerBooking(booking, id) {
 
 /**
  * Removes a booking from bookings and bookedTimes
- * @param {number} id 
+ * @param {number} id id of the booking to remove
+ * @param {string} user id of the user removing the booking
  */
-function removeBooking(id) {
+function removeBooking(id, user) {
 	if (!(id in bookings)) {
-		return false;
+		throw 'Booking does not exist';
 	}
+
 	var booking = bookings[id];
+	if (user != booking.id) {
+		throw 'You don\'t have permission to delete that booking';
+	}
+
 	var bookingtimes = [moment(booking.STime), moment(booking.ETime)];
 	var year = bookingtimes[0].year();
 	var day = bookingtimes[0].dayOfYear();
@@ -202,8 +211,7 @@ async function verify(token) {
 		//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
 	});
 	const payload = await ticket.getPayload();
-	const userid = payload['sub'];
-	return userid;
+	return payload;
 }
 
 // NODE SERVER
@@ -231,15 +239,25 @@ app.get('/users', function(req, resp) {
 });
 
 /* ADD OR UPDATE USER ENTRY */
-app.post('/updateuser', function(req, resp) {
-	updateUser(req.body.id, req.body.name);
+app.post('/updateuser', async function(req, resp) {
+	try {
+		var user = await verify(req.body.id);
+	}
+	catch (error) {
+		resp.status(401).send('Error: Failed to verify your Google account');
+		return;
+	}
+
+	updateUser(user['sub'], req.body.name);
 	resp.send('User successfully updated');
 });
 
 /* NEW BOOKING */
 app.post('/new', async function(req, resp) {
 	try {
-		var id = await verify(req.body.id);
+		var user = await verify(req.body.id);
+		var id = user['sub'];
+		var email = user['email'];
 	}
 	catch (error) {
 		resp.status(401).send('Error: Failed to verify your Google account');
@@ -247,7 +265,7 @@ app.post('/new', async function(req, resp) {
 	}
 
 	try {
-		createBooking(req.body.stime, req.body.etime, req.body.name, id, req.body.recurrence);
+		createBooking(req.body.stime, req.body.etime, req.body.name, id, req.body.recurrence, email);
 	}
 	catch(error) {
 		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
@@ -256,25 +274,28 @@ app.post('/new', async function(req, resp) {
 });
 
 /* REMOVE BOOKING */
-app.post('/remove', function(req, resp) {
-	if (removeBooking(req.body.id)) {
-		resp.send('Successfully removed booking ' + req.body.id);
+app.post('/remove', async function(req, resp) {
+	try {
+		var user = await verify(req.body.user);
+		var id = user['sub'];
 	}
-	else {
-		resp.send('Booking ' + req.body.id +' did not exist in the first place');
+	catch (error) {
+		resp.status(401).send('Error: failed to verify your Google account');
 	}
+	try {
+		removeBooking(req.body.id, id);
+	}
+	catch (error) {
+		resp.send('Error:', error);
+		return;
+	}
+	resp.send('Successfully removed booking ' + req.body.id);
 });
 
 /* DEBUG: GET FULL STATE */
 app.get('/all', function(req, resp) {
 	var body = {'bookings': bookings, 'bookedTimes': bookedTimes, 'bookingnum': bookingnum, 'bookingpool': bookingpool, 'UserList': UserList};
 	resp.send(body);
-});
-
-/* GOOGLE SIGNIN */
-app.post('/signin', async function(req, resp) {
-	var userid = await verify(req.body.idtoken);
-	resp.send(userid);
 });
 
 /* OTHERWISE */

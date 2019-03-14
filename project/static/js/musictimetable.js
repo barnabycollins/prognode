@@ -11,7 +11,7 @@ async function updateTable() {
 
 function process(bookings) {
 	// add table inside #timetable-container with header row and initial box
-	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
+	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped table-responsive\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
 
 	// build table with cells for each time slot
 	var today = moment().isoWeekday()-1;
