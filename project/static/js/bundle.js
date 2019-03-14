@@ -4864,6 +4864,16 @@ function process(bookings) {
 	setTimeout(hideLoad, 1000);
 }
 
+$('#bookingform').submit(async function(e) {
+	e.preventDefault();
+	await $.ajax({
+		url: '/new',
+		type: 'POST',
+		data: $('#bookingform').serialize()
+	});
+	updateTable();
+});
+
 function hideLoad() {
 	$('#loading-screen').remove();
 }

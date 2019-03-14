@@ -56,7 +56,7 @@ class Booking {
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(STime, ETime, name, id, recurrence) {
-	var recurrencedict = {'1': true, '0': false};
+	var recurrencedict = {'on': true, 'off': false};
 	
 	// add the user to the user database if we haven't already
 	if (!(id in UserList)) {
@@ -78,8 +78,7 @@ function createBooking(STime, ETime, name, id, recurrence) {
 	}
 
 	// make booking object
-	var toAdd = new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), parseInt(id), recurrencedict[recurrence]);
-
+	var toAdd = new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), id, recurrencedict[recurrence]);
 	var bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();
@@ -189,7 +188,7 @@ function removeBooking(id) {
 var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
-createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', 80, '0');
+createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', '80', 'off');
 
 const CLIENT_ID = '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com';
 
@@ -238,13 +237,22 @@ app.post('/updateuser', function(req, resp) {
 });
 
 /* NEW BOOKING */
-app.post('/new', function(req, resp) {
-	if (createBooking(req.body.stime, req.body.etime, req.body.name, req.body.id, req.body.recurrence)) {
-		resp.send('Successfully added your booking to the database.');
+app.post('/new', async function(req, resp) {
+	try {
+		var id = await verify(req.body.id);
 	}
-	else {
-		resp.status(409).send('Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
+	catch (error) {
+		resp.status(401).send('Error: Failed to verify your Google account');
+		return;
 	}
+
+	try {
+		createBooking(req.body.stime, req.body.etime, req.body.name, id, req.body.recurrence);
+	}
+	catch(error) {
+		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
+	}
+	resp.send('Successfully added your booking to the database.');
 });
 
 /* REMOVE BOOKING */
