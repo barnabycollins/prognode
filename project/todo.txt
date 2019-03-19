@@ -1,1 +1,2 @@
 batch job: remove old bookings, check bookedTimes
+display user's current bookings and give them the option to delete them from the UI

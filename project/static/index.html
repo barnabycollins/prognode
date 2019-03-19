@@ -12,6 +12,9 @@
 <body>
 	<div class="container">
 		<br>
+		<a id="signin-link">
+			<img id="user-img" src="img/google_icon.png"><span id="usr-name">Sign in</span>
+		</a>
 		<!--<h1>Cuth's Music Room Bookings</h1>-->
 		<div class="d-md-none">
 			Scroll sideways to see more days.
@@ -21,7 +24,6 @@
 			Loading data...
 		</div>
 		<div id="clash-container" class="content-div"></div>
-		<div class="g-signin2" data-onsuccess="onSignIn"></div>
 		<br>
 		<form id="bookingform">
 			<input type="datetime-local" name="stime">
@@ -48,26 +50,5 @@
 			Loading...
 		</div>
 	</div>
-
-	<script>
-		/* eslint-disable */
-		function onSignIn(googleUser) {
-			var profile = googleUser.getBasicProfile();
-			id_token = googleUser.getAuthResponse().id_token;
-			console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-			console.log('Name: ' + profile.getName());
-			console.log('Image URL: ' + profile.getImageUrl());
-			console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
-/* 			var xhr = new XMLHttpRequest();
-			xhr.open('POST', '/signin');
-			xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-			xhr.onload = function() {
-			console.log('Signed in as: ' + xhr.responseText);
-			};
-			xhr.send('idtoken=' + id_token); */
-			$('#idbox').attr("value", id_token);
-		}
-		/* eslint-enable */
-	</script>
 </body>
 </html>

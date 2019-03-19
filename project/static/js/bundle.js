@@ -4792,6 +4792,10 @@ process.umask = function() { return 0; };
 (function (process){
 var moment = require('moment');
 var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+var idtoken;
+
+// tell eslint that the Google API is a thing
+/* global gapi */
 
 async function updateTable() {
 	var data = await fetch('/bookings');
@@ -4803,7 +4807,7 @@ async function updateTable() {
 
 function process(bookings) {
 	// add table inside #timetable-container with header row and initial box
-	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped table-responsive\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
+	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
 
 	// build table with cells for each time slot
 	var today = moment().isoWeekday()-1;
@@ -4886,6 +4890,28 @@ var sortByDates = function(row1, row2) {
 	if (row1.booktime < row2.booktime) return -1;
 	return 0;
 };
-updateTable();
+
+
+document.addEventListener('DOMContentLoaded', function() {
+	updateTable();
+	gapi.load('auth2', function(){
+		// Retrieve the singleton for the GoogleAuth library and set up the client.
+		var auth2 = gapi.auth2.init({
+			client_id: '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com',
+			cookiepolicy: 'single_host_origin'
+		});
+		auth2.attachClickHandler(document.getElementById('signin-link'), {},
+			function(googleUser) {
+				var profile = googleUser.getBasicProfile();
+				idtoken = googleUser.getAuthResponse().id_token;
+				$('#user-img').attr('src', profile.getImageUrl());
+				$('#usr-name').html(profile.getName());
+				$('#idbox').attr('value', idtoken);
+			}, function(error) {
+				alert(JSON.stringify(error, undefined, 2));
+			}
+		);
+	});
+});
 }).call(this,require('_process'))
 },{"_process":2,"moment":1}]},{},[3]);
