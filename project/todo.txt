@@ -5,3 +5,4 @@ implement better date pickers
 ensure non-hour dates are dealt with
 check bookings in future weeks
 make page mobile-responsive
+add dates in table headers
