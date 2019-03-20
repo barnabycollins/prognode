@@ -4807,33 +4807,33 @@ async function updateTable() {
 
 function process(bookings) {
 	// add table inside #timetable-container with header row and initial box
-	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
+	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped table-responsive\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
 
 	// build table with cells for each time slot
-	var today = moment().isoWeekday()-1;
-	var indexes = [];
+	var today = moment();
 	var i, j;
-	for (i = 0; i < 7; i++) {
-		indexes.push((i+today)%7);
+
+	for (i = 0; i < 21; i++) {
+		$('#timetable-header').append('<th><div class=\'width-normaliser\'>'+days[(i+today.isoWeekday()-1)%7]+'</div></th>');
 	}
 
-	for (i = 0; i < 7; i++) {
-		if (indexes[i] == 0) {
-			$('#timetable-header').append('<th class=\'mon-col\'>'+days[indexes[i]]+'</th>');
-		}
-		else {
-			$('#timetable-header').append('<th>'+days[indexes[i]]+'</th>');
-		}
-	}
 	for (j = 10; j < 22; j++) {
 		$('#timetable').append('<tr id=\''+j+'\'><th class=\'time-header\'>'+j+':00</th></tr>');
-		for (i = 0; i < 7; i++) {
-			if (indexes[i] == 0) {
-				$('#'+j).append('<td id=\''+indexes[i]+'-'+j+'\' class=\'mon-col\'></td>');
-			}
-			else {
-				$('#'+j).append('<td id=\''+indexes[i]+'-'+j+'\'></td>');
-			}
+		for (i = 0; i < 21; i++) {
+			$('#'+j).append('<td id=\''+i+'-'+j+'\'></td>');
+		}
+	}
+
+	// get an ordered list of table headers
+	var headers = $('#timetable-header').find('th');
+	// for the three coming Mondays
+	for (i = 8-today.isoWeekday(); i < 21; i += 7) {
+		// add mon-col class to the header
+		$(headers[i]).addClass('mon-col');
+
+		// add mon-col to each hour cell
+		for (j = 10; j < 22; j++) {
+			$('#' + i + '-' + j).addClass('mon-col');
 		}
 	}
 
@@ -4843,7 +4843,7 @@ function process(bookings) {
 
 	for (i = bookings.length-1; i >= 0; i--) {
 		// load information from rows and place required data into variables
-		var day = moment(bookings[i].STime).isoWeekday() - 1;
+		var day = moment(bookings[i].STime).diff(today, 'days');
 		var time = [moment(bookings[i].STime).hour(), moment(bookings[i].ETime).hour()];
 		var sessionLength = (time[1]-time[0]);
 		var tableID = '#'+day.toString()+'-';

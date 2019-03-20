@@ -1,6 +1,7 @@
-batch job: remove old bookings, check bookedTimes
+batch job: remove old bookings, check bookedTimes every 24 hours
 display user's current bookings and give them the option to delete them from the UI
 think about how to handle names (ie event names / separate user names vs Google Signin names, flexibility etc - probably put names back into booking class)
 implement better date pickers
 ensure non-hour dates are dealt with
-check bookings are in the next week
+check bookings in future weeks
+make page mobile-responsive

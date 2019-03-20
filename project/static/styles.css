@@ -8,12 +8,13 @@ body {
     table-layout: fixed;
     box-shadow: 0px 0px 40px -10px #000;
     color: #ccc;
+    word-wrap: break-word;
 }
 #timetable-header th {
     text-align: center;
 }
-td {
-    word-wrap: break-word;
+.width-normaliser {
+    width: 100px;
 }
 #form-frame {
     height: 0px;
@@ -30,7 +31,6 @@ td {
 }
 .time-header {
     text-align: center;
-    width: 70px;
     border-right: 1px solid;
 }
 footer {

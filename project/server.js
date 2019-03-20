@@ -16,7 +16,7 @@ class User {
 }
 
 var UserList = {};
-UserList[1337] = new User('Barnaby Collins', 9, 'barnstormer322@gmail.com');
+UserList[116714588086254124711] = new User('Barnaby Collins', 9, 'barnstormer322@gmail.com');
 
 /**
 * Add or update user entry
@@ -257,16 +257,21 @@ app.post('/updateuser', async function(req, resp) {
 app.post('/new', async function(req, resp) {
 	try {
 		var user = await verify(req.body.id);
-		var id = user['sub'];
-		var email = user['email'];
 	}
 	catch (error) {
 		resp.status(401).send('Error: Failed to verify your Google account');
 		return;
 	}
 
+	var id = user['sub'];
+	var email = user['email'];
+	var name = req.body.name;
+	if (!name) {
+		name = user['name'];
+	}	
+
 	try {
-		createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, id, req.body.recurrence, email);
+		createBooking(req.body.date, req.body.stime, req.body.etime, name, id, req.body.recurrence, email);
 	}
 	catch(error) {
 		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
