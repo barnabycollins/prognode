@@ -254,6 +254,7 @@ app.post('/updateuser', async function(req, resp) {
 
 /* NEW BOOKING */
 app.post('/new', async function(req, resp) {
+	console.log(req.body);
 	try {
 		var user = await verify(req.body.id);
 		var id = user['sub'];

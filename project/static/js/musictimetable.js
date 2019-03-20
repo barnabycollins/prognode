@@ -99,6 +99,15 @@ var sortByDates = function(row1, row2) {
 	return 0;
 };
 
+$('#datepicker-test').datepicker({
+	'format': 'dd/mm/yyyy'
+});
+$('#time-test').timepicker({
+	'minTime': '10:00am',
+	'maxTime': '10:00pm',
+	'step': 60,
+	'timeFormat': 'H\\:i'
+});
 
 document.addEventListener('DOMContentLoaded', function() {
 	updateTable();
