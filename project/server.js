@@ -52,13 +52,14 @@ class Booking {
 
 /**
 * Create new booking
+* @param {object} date
 * @param {object} STime JS Date.toString() object representing the start time of the booking
 * @param {object} ETime JS Date.toString() object representing the end time of the booking
 * @param {string} name the name to display on that booking
 * @param {string} id the user id of the person that made the booking
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
-function createBooking(STime, ETime, name, id, recurrence, email) {
+function createBooking(date, STime, ETime, name, id, recurrence, email) {
 	var recurrencedict = {'on': true, 'off': false};
 	
 	// add the user to the user database if we haven't already
@@ -66,8 +67,8 @@ function createBooking(STime, ETime, name, id, recurrence, email) {
 		UserList[id] = new User(name, 0, email);
 	}
 
-	var start = moment(STime);
-	var end = moment(ETime);
+	var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm');
+	var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm');
 	var mintime = start.clone().hour(10).minute(0).second(0).millisecond(0);
 	var maxtime = start.clone().hour(22).minute(0).second(0).millisecond(0);
 
@@ -81,7 +82,7 @@ function createBooking(STime, ETime, name, id, recurrence, email) {
 	}
 
 	// make booking object
-	var toAdd = new Booking(Date.now(), Date.parse(STime), Date.parse(ETime), id, recurrencedict[recurrence]);
+	var toAdd = new Booking(Date.now(), Date.parse(start), Date.parse(end), id, recurrencedict[recurrence]);
 	var bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();
@@ -197,7 +198,7 @@ function removeBooking(id, user) {
 var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
-createBooking('13 Mar 2019 10:00:00 GMT', '13 Mar 2019 12:00:00 GMT', 'steve', '80', 'off');
+createBooking('20/03/2019', '10:00', '12:00', 'steve', '80', 'off');
 
 const CLIENT_ID = '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com';
 
@@ -254,7 +255,6 @@ app.post('/updateuser', async function(req, resp) {
 
 /* NEW BOOKING */
 app.post('/new', async function(req, resp) {
-	console.log(req.body);
 	try {
 		var user = await verify(req.body.id);
 		var id = user['sub'];
@@ -266,7 +266,7 @@ app.post('/new', async function(req, resp) {
 	}
 
 	try {
-		createBooking(req.body.stime, req.body.etime, req.body.name, id, req.body.recurrence, email);
+		createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, id, req.body.recurrence, email);
 	}
 	catch(error) {
 		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');

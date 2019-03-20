@@ -4891,10 +4891,16 @@ var sortByDates = function(row1, row2) {
 	return 0;
 };
 
-$('#datepicker-test').datepicker({
+$('#datepicker').datepicker({
 	'format': 'dd/mm/yyyy'
 });
-$('#time-test').timepicker({
+$('#timepicker1').timepicker({
+	'minTime': '10:00am',
+	'maxTime': '10:00pm',
+	'step': 60,
+	'timeFormat': 'H\\:i'
+});
+$('#timepicker2').timepicker({
 	'minTime': '10:00am',
 	'maxTime': '10:00pm',
 	'step': 60,
