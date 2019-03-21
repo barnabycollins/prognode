@@ -67,10 +67,10 @@ function createBooking(date, STime, ETime, name, id, recurrence, email) {
 		UserList[id] = new User(name, 0, email);
 	}
 
-	var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm');
-	var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm');
-	var mintime = start.clone().hour(10).minute(0).second(0).millisecond(0);
-	var maxtime = start.clone().hour(22).minute(0).second(0).millisecond(0);
+	var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	var mintime = start.clone().hour(10);
+	var maxtime = start.clone().hour(22);
 
 	// make sure that both start and end land in the range of 10 til 10 on the date of the start time
 	if (!(start.isBetween(mintime, maxtime, null, '[]') && end.isBetween(mintime, maxtime, null, '[]'))) {
@@ -198,7 +198,7 @@ function removeBooking(id, user) {
 var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
-createBooking('20/03/2019', '10:00', '12:00', 'steve', '80', 'off');
+createBooking('22/03/2019', '10:00', '12:00', 'steve', '80', 'off');
 
 const CLIENT_ID = '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com';
 
@@ -208,8 +208,6 @@ async function verify(token) {
 	const ticket = await client.verifyIdToken({
 		idToken: token,
 		audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
-		// Or, if multiple clients access the backend:
-		//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
 	});
 	const payload = await ticket.getPayload();
 	return payload;
@@ -275,6 +273,7 @@ app.post('/new', async function(req, resp) {
 	}
 	catch(error) {
 		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
+		return;
 	}
 	resp.send('Successfully added your booking to the database.');
 });

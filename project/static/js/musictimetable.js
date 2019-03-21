@@ -1,6 +1,7 @@
 var moment = require('moment');
 var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 var idtoken;
+var loggedIn = false;
 
 // tell eslint that the Google API is a thing
 /* global gapi */
@@ -22,7 +23,7 @@ function process(bookings) {
 	var i, j;
 
 	for (i = 0; i < 21; i++) {
-		$('#timetable-header').append('<th><div class=\'width-normaliser\'>'+days[(i+today.isoWeekday()-1)%7]+'</div></th>');
+		$('#timetable-header').append('<th><div class=\'width-normaliser\'>'+days[(i+today.isoWeekday()-1)%7]+'</div>' + moment(today).add(i, 'days').format('DD/MM') + '</th>');
 	}
 
 	for (j = 10; j < 22; j++) {
@@ -50,8 +51,8 @@ function process(bookings) {
 
 
 	for (i = bookings.length-1; i >= 0; i--) {
-		// load information from rows and place required data into variables
-		var day = moment(bookings[i].STime).diff(today, 'days');
+		// get number of days before the booking
+		var day = moment(bookings[i].STime).startOf('day').diff(today.startOf('day'), 'days');
 		var time = [moment(bookings[i].STime).hour(), moment(bookings[i].ETime).hour()];
 		var sessionLength = (time[1]-time[0]);
 		var tableID = '#'+day.toString()+'-';
@@ -78,13 +79,23 @@ function process(bookings) {
 
 $('#bookingform').submit(async function(e) {
 	e.preventDefault();
-	await $.ajax({
-		url: '/new',
-		type: 'POST',
-		data: $('#bookingform').serialize()
-	});
-	updateTable();
+	if (loggedIn) {
+		await $.ajax({
+			url: '/new',
+			type: 'POST',
+			data: $('#bookingform').serialize()
+		});
+		updateTable();
+	}
+	else {
+		$('#signin-link').css('background-color', '#ff0000');
+		setTimeout(unRed, 500);
+	}
 });
+
+function unRed() {
+	$('#signin-link').css('background-color', '');
+}
 
 function hideLoad() {
 	$('#loading-screen').remove();
@@ -130,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				$('#user-img').attr('src', profile.getImageUrl());
 				$('#usr-name').html(profile.getName());
 				$('#idbox').attr('value', idtoken);
+				loggedIn = true;
 			}, function(error) {
 				alert(JSON.stringify(error, undefined, 2));
 			}
