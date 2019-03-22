@@ -1,8 +1,8 @@
 batch job: remove old bookings, check bookedTimes every 24 hours
 display user's current bookings and give them the option to delete them from the UI
-think about how to handle names (ie event names / separate user names vs Google Signin names, flexibility etc - probably put names back into booking class)
 implement better date pickers
 check bookings in future weeks
 make page mobile-responsive
 add dates in table headers
 permissions
+handle blocked Google popup

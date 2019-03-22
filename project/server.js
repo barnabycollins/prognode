@@ -40,13 +40,15 @@ class Booking {
 	* @param {object} ETime JS Date object representing the end time of the booking
 	* @param {string} id the user id of the person that made the booking
 	* @param {boolean} recurrence whether or not the booking will recur every week
+	* @param {string} name the name attached to the booking
 	*/
-	constructor(booktime, STime, ETime, id, recurrence) {
+	constructor(booktime, STime, ETime, id, recurrence, name) {
 		this.booktime = booktime;
 		this.STime = STime;
 		this.ETime = ETime;
 		this.id = id;
 		this.recurrence = recurrence;
+		this.name = name;
 	}
 }
 
@@ -56,15 +58,23 @@ class Booking {
 * @param {object} STime JS Date.toString() object representing the start time of the booking
 * @param {object} ETime JS Date.toString() object representing the end time of the booking
 * @param {string} name the name to display on that booking
-* @param {string} id the user id of the person that made the booking
+* @param {string} user the user object of the Google account that made the booking
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
-function createBooking(date, STime, ETime, name, id, recurrence, email) {
+function createBooking(date, STime, ETime, name, user, recurrence) {
 	var recurrencedict = {'on': true, 'off': false};
+
+	// pull information from user object
+	if (!name) {
+		name = user['name'];
+	}
+	var id = user['sub'];
+	var email = user['email'];
+	var userName = user['name'];
 	
 	// add the user to the user database if we haven't already
 	if (!(id in UserList)) {
-		UserList[id] = new User(name, 0, email);
+		UserList[id] = new User(userName, 0, email);
 	}
 
 	var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
@@ -82,7 +92,7 @@ function createBooking(date, STime, ETime, name, id, recurrence, email) {
 	}
 
 	// make booking object
-	var toAdd = new Booking(Date.now(), Date.parse(start), Date.parse(end), id, recurrencedict[recurrence]);
+	var toAdd = new Booking(Date.now(), Date.parse(start), Date.parse(end), id, recurrencedict[recurrence], name);
 	var bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();
@@ -198,7 +208,7 @@ function removeBooking(id, user) {
 var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
-createBooking('22/03/2019', '10:00', '12:00', 'steve', '80', 'off');
+createBooking('22/03/2019', '10:00', '12:00', 'steve', {'sub': 80, 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
 
 const CLIENT_ID = '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com';
 
@@ -225,7 +235,6 @@ app.get('/bookings', function(req, resp) {
 	for (var i = 0; i < Object.keys(bookings).length; i++) {
 		// j = current booking object
 		var j = Object.assign({}, bookings[Object.keys(bookings)[i]]);
-		j['name'] = UserList[j.id].name;
 		delete j.id;
 		content.push(j);
 	}
@@ -261,15 +270,8 @@ app.post('/new', async function(req, resp) {
 		return;
 	}
 
-	var id = user['sub'];
-	var email = user['email'];
-	var name = req.body.name;
-	if (!name) {
-		name = user['name'];
-	}	
-
 	try {
-		createBooking(req.body.date, req.body.stime, req.body.etime, name, id, req.body.recurrence, email);
+		createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, user, req.body.recurrence);
 	}
 	catch(error) {
 		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
