@@ -16,7 +16,7 @@ class User {
 }
 
 var UserList = {};
-UserList[116714588086254124711] = new User('Barnaby Collins', 9, 'barnstormer322@gmail.com');
+UserList['116714588086254124711'] = new User('Barnaby Collins', 9, 'barnstormer322@gmail.com');
 
 /**
 * Add or update user entry

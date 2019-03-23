@@ -16,16 +16,6 @@ body {
 .width-normaliser {
     width: 100px;
 }
-#form-frame {
-    height: 0px;
-    transition: height 1s ease;
-}
-#clashes-content {
-    background-color: #ff0000;
-    color: #ffffff;
-    padding: 2% 3%;
-    box-shadow: 0px 0px 40px -10px #000;
-}
 .content-div {
     margin-bottom: 3%;
 }
