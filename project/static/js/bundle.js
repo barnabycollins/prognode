@@ -4931,7 +4931,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				var profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
 				$('#user-img').attr('src', profile.getImageUrl());
-				$('#usr-name').html('Signed in' /*profile.getName()*/);
+				$('#usr-name').html(profile.getName());
 				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
 			}, function(error) {

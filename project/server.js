@@ -84,11 +84,11 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 
 	// make sure that both start and end land in the range of 10 til 10 on the date of the start time
 	if (!(start.isBetween(mintime, maxtime, null, '[]') && end.isBetween(mintime, maxtime, null, '[]'))) {
-		return false;
+		throw 'Invalid start / end times';
 	}
 	// make sure end is after start (and the session spans at least one hour)
 	else if (end.hour() <= start.hour()) {
-		return false;
+		throw 'End is before start';
 	}
 
 	// make booking object
@@ -100,17 +100,17 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	else {
 		bookingnum += 1;
 	}
-	// if the booking doesn't clash, add it to bookings
-	if (registerBooking(toAdd, bookId)) {
-		bookings[bookId] = toAdd;
-	}
-	// otherwise, return false
-	else {
-		return false;
-	}
 	
-	// if we completed successfully, return true
-	return true;
+	// try and add the booking to the clash structure
+	try {
+		registerBooking(toAdd, bookId);
+	}
+	catch(error) {
+		throw error;
+	}
+
+	// if we added the booking successfully, add it to the database
+	bookings[bookId] = toAdd;
 }
 
 
@@ -144,26 +144,22 @@ function registerBooking(booking, id) {
 		}
 		// if there's a clash
 		else {
-			// if the clashing booking belongs to the same user as the booking being added
-			if (bookings[bookedTimes[year][day][j]].id == booking.id) {
-				// remove that booking and continue adding the current booking
-				removeBooking(bookedTimes[year][day][j]);
-				bookedTimes[year][day][j] = id;
+			try {
+				// remove that booking and try adding the current booking again
+				removeBooking(bookedTimes[year][day][j], id);
+				registerBooking(booking, id);
 			}
-			else {
-				// if it belongs to someone else
+			catch(error) {
+				// if we fail to remove the clashing booking(s)
 				for (var k = bookingtimes[0].hour(); k < j; k++) {
 					// remove past entries in bookedTimes and put the id back in the bookingpool
 					delete bookedTimes[year][day][j];
 					bookingpool.push(id);
 				}
-				// return a failure
-				return false;
+				throw error;
 			}
 		}
 	}
-	// if we successfully made a booking, return success
-	return true;
 }
 
 /**
@@ -173,11 +169,11 @@ function registerBooking(booking, id) {
  */
 function removeBooking(id, user) {
 	if (!(id in bookings)) {
-		throw 'Booking does not exist';
+		throw 'Booking being removed does not exist';
 	}
 
 	var booking = bookings[id];
-	if (user != booking.id) {
+	if (user != booking.id && UserList[user] < 9) {
 		throw 'You don\'t have permission to delete that booking';
 	}
 
@@ -201,14 +197,20 @@ function removeBooking(id, user) {
 	// remove booking from bookings database and release the id back to the pool
 	delete bookings[id];
 	bookingpool.push(id);
-
-	return true;
 }
 
 var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
-createBooking('22/03/2019', '10:00', '12:00', 'steve', {'sub': 80, 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
+
+// create a default booking to play with
+try {
+	createBooking('25/03/2019', '10:00', '12:00', 'steve', {'sub': 80, 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
+}
+catch (error) {
+	// eslint-disable-next-line no-console
+	console.log('Failed to create booking: ' + error);
+}
 
 const CLIENT_ID = '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com';
 
@@ -274,7 +276,7 @@ app.post('/new', async function(req, resp) {
 		createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, user, req.body.recurrence);
 	}
 	catch(error) {
-		resp.status(409).send('Error: Failed to add your booking, likely because of a clash with an existing booking. Please check the timetable before making your booking! Alternatively, this could be because your booking lands outside the 10-til-10 range allowed.');
+		resp.status(409).send('Error: failed to create your booking: ' + error);
 		return;
 	}
 	resp.send('Successfully added your booking to the database.');

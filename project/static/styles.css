@@ -73,3 +73,12 @@ footer {
     line-height: 18px;
     vertical-align: middle;
 }
+div#timetable-container ::-webkit-scrollbar {
+    width: 10px;
+}
+div#timetable-container ::-webkit-scrollbar-track {
+    background-color: #212529;
+}
+div#timetable-container ::-webkit-scrollbar-thumb {
+    background-color: #444;
+}
