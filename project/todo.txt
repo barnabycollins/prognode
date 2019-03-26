@@ -4,4 +4,3 @@ check bookings in future weeks
 make page mobile-responsive
 permissions
 handle blocked Google popup
-sort out error handling

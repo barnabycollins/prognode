@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
 			}, function(error) {
-				alert(JSON.stringify(error, undefined, 2));
+				$('#usr-name').html(JSON.stringify(error, undefined, 2));
 			}
 		);
 	});

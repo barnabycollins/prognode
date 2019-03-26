@@ -43,6 +43,13 @@ footer {
     align-items:center;
     transition: opacity 0.8s;
 }
+#loadtext a {
+    color: #ccc;
+    text-decoration: underline;
+}
+#loadtext a:hover {
+    color: #aaa;
+}
 #signin-link {
     display: flex;
     align-items: center;

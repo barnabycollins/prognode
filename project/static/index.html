@@ -51,8 +51,17 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
 	<script type="text/javascript" src="js/jquery.timepicker.min.js"></script>
 	<script src="js/bundle.js"></script>
+	<script id="browsertest">
+		document.addEventListener('DOMContentLoaded', function() {
+			var ua = navigator.userAgent;			
+			if (ua.indexOf('MSIE ') > -1 || ua.indexOf('Trident/') > -1) {
+				$('#loadtext').html('It appears you are using Internet Explorer, which is not supported. Please use a more modern browser, such as Microsoft Edge, <a href="https://chrome.google.com">Chrome</a> or <a href="https://www.mozilla.org/en-GB/firefox/">Firefox</a>!');
+			}
+		});
+		$('#browsertest').remove();
+	</script>
 	<div id="loading-screen">
-		<div>
+		<div id="loadtext">
 			Loading...
 		</div>
 	</div>
