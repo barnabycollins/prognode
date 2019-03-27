@@ -36,14 +36,16 @@ class Booking {
 	/**
 	* Class for a booking
 	* @param {number} booktime unix timestamp for the time the booking was made (used for priority)
-	* @param {object} STime JS Date object representing the start time of the booking
-	* @param {object} ETime JS Date object representing the end time of the booking
+	* @param {string} date date of booking
+	* @param {string} STime start time of the booking
+	* @param {string} ETime end time of the booking
 	* @param {string} id the user id of the person that made the booking
 	* @param {boolean} recurrence whether or not the booking will recur every week
 	* @param {string} name the name attached to the booking
 	*/
-	constructor(booktime, STime, ETime, id, recurrence, name) {
+	constructor(booktime, date, STime, ETime, id, recurrence, name) {
 		this.booktime = booktime;
+		this.date = date;
 		this.STime = STime;
 		this.ETime = ETime;
 		this.id = id;
@@ -92,7 +94,7 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	}
 
 	// make booking object
-	var toAdd = new Booking(Date.now(), Date.parse(start), Date.parse(end), id, recurrencedict[recurrence], name);
+	var toAdd = new Booking(Date.now(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrencedict[recurrence], name);
 	var bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();
@@ -123,7 +125,7 @@ var bookedTimes = {};
  * @param {number} id id to give to the booking
  */
 function registerBooking(booking, id) {
-	var bookingtimes = [moment(booking.STime), moment(booking.ETime)];
+	var bookingtimes = getTimestamps(booking);
 	var year = bookingtimes[0].year();
 	var day = bookingtimes[0].dayOfYear();
 	
@@ -177,7 +179,7 @@ function removeBooking(id, user) {
 		throw 'You don\'t have permission to delete that booking';
 	}
 
-	var bookingtimes = [moment(booking.STime), moment(booking.ETime)];
+	var bookingtimes = getTimestamps(booking);
 	var year = bookingtimes[0].year();
 	var day = bookingtimes[0].dayOfYear();
 
@@ -199,13 +201,17 @@ function removeBooking(id, user) {
 	bookingpool.push(id);
 }
 
+function getTimestamps(booking) {
+	return [moment(booking.date + ' ' + booking.STime, 'DD/MM/YYYY HH:mm'), moment(booking.date + ' ' + booking.ETime, 'DD/MM/YYYY HH:mm')];
+}
+
 var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
 
 // create a default booking to play with
 try {
-	createBooking('25/03/2019', '10:00', '12:00', 'steve', {'sub': 80, 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
+	createBooking('28/03/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
 }
 catch (error) {
 	// eslint-disable-next-line no-console
@@ -232,20 +238,37 @@ app.use(express.urlencoded({extended: false}));
 app.use(express.static('static'));
 
 /* GETTING BOOKINGS */
-app.get('/bookings', function(req, resp) {
-	var content = [];
-	for (var i = 0; i < Object.keys(bookings).length; i++) {
-		// j = current booking object
-		var j = Object.assign({}, bookings[Object.keys(bookings)[i]]);
-		delete j.id;
-		content.push(j);
+app.get('/bookings', async function(req, resp) {
+	var content = {};
+	var i, j;
+	var token = req.header('token');
+	if (token) {
+		try {
+			var user = await verify(token);
+			user = user['sub'];
+		}
+		catch(error) {
+			resp.status(401).send('Error: Failed to verify your Google account');
+			return;
+		}
+		for (i of Object.keys(bookings)) {
+			if (bookings[i].id == user) {
+				j = Object.assign({}, bookings[i]);
+				delete j.id;
+				content[i] = j;
+			}
+		}
+	}
+	else {
+		for (i of Object.keys(bookings)) {
+			// j = current booking object
+			j = Object.assign({}, bookings[i]);
+			delete j.id;
+			content[i] = j;
+		}
+
 	}
 	resp.send(content);
-});
-
-/* GETTING USER LIST */
-app.get('/users', function(req, resp) {
-	resp.send(UserList);
 });
 
 /* ADD OR UPDATE USER ENTRY */

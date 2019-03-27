@@ -4838,14 +4838,10 @@ function process(bookings) {
 		}
 	}
 
-	// ensure bookings is sorted in descending priority
-	bookings.sort(sortByDates);
-
-
-	for (i = bookings.length-1; i >= 0; i--) {
+	for (i of Object.keys(bookings)) {
 		// get number of days before the booking
-		var day = moment(bookings[i].STime).startOf('day').diff(today.startOf('day'), 'days');
-		var time = [moment(bookings[i].STime).hour(), moment(bookings[i].ETime).hour()];
+		var day = moment(bookings[i].date, 'DD/MM/YYYY').startOf('day').diff(today.startOf('day'), 'days');
+		var time = [moment(bookings[i].date + ' ' + bookings[i].STime, 'DD/MM/YYYY HH:mm').hour(), moment(bookings[i].date + ' ' + bookings[i].ETime, 'DD/MM/YYYY HH:mm').hour()];
 		var sessionLength = (time[1]-time[0]);
 		var tableID = '#'+day.toString()+'-';
 		for (j = 1; j < sessionLength; j++) {
@@ -4878,6 +4874,7 @@ $('#bookingform').submit(async function(e) {
 			data: $('#bookingform').serialize()
 		});
 		updateTable();
+		getUserBookings(idtoken);
 	}
 	else {
 		$('#signin-link').css('background-color', '#ff0000');
@@ -4892,15 +4889,31 @@ function unRed() {
 function hideLoad() {
 	$('#loading-screen').remove();
 }
+async function getUserBookings(token) {
+	var data = await fetch('/bookings', {headers: {'token': token}});
+	data = await data.json();
+	if (Object.keys(data).length > 0) {
+		showBookings(data);
+	}
+}
+
+function showBookings(bookings) {
+	$('#user-bookings').html('<h2>Your upcoming bookings</h2><table id="userTable" class="table table-dark table-striped"><tr><th>Name</th><th>Date</th><th>Time</th><th>Date Made</th></tr></table>');
+	for (var i of Object.keys(bookings)) {
+		var cur = bookings[i];
+		$('#userTable').append('<tr id="' + i + '"><td>' + cur.name + '</td><td>' + cur.date + '</td><td>' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td></tr>');
+	}
+}
+
 // define function for sorting bookings by date booking was made (to determine priority)
 // repeated items take priority
-var sortByDates = function(row1, row2) {
+/* var sortByDates = function(row1, row2) {
 	if (row1.recurrence) return -1;
 	if (row2.recurrence) return 1;
 	if (row1.booktime > row2.booktime) return 1;
 	if (row1.booktime < row2.booktime) return -1;
 	return 0;
-};
+}; */
 
 $('#datepicker').datepicker({
 	'format': 'dd/mm/yyyy'
@@ -4934,6 +4947,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				$('#usr-name').html(profile.getName());
 				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
+				getUserBookings(idtoken);
 			}, function(error) {
 				$('#usr-name').html(JSON.stringify(error, undefined, 2));
 			}

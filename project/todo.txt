@@ -4,3 +4,4 @@ check bookings in future weeks
 make page mobile-responsive
 permissions
 handle blocked Google popup
+consider ways of storing timestamps: unix time vs date + 2x hour
