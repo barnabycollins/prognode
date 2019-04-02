@@ -1,8 +1,7 @@
 batch job: remove old bookings, check bookedTimes every 24 hours (archiving?)
-give user the option to delete their bookings from the UI
+test UI booking deletions
 check bookings in future weeks
 make page properly mobile-responsive
-make forms more usable
+make forms more aesthetic / usable
 permissions
 handle blocked Google popup
-consider ways of storing timestamps: unix time vs date + 2x hour
