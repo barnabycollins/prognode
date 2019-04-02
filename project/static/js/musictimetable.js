@@ -114,6 +114,7 @@ function showBookings(bookings) {
 	$('.rem-btn').each(function() {
 		this.addEventListener('click', async function() {
 			var elem = this;
+			$(elem).css('background-color', '#ff0000');
 			await $.ajax({
 				url: '/remove',
 				type: 'POST',
@@ -122,8 +123,8 @@ function showBookings(bookings) {
 					user: idtoken
 				},
 				success: function() {
-					updateTable();
 					$(elem).css('background-color', '#00ff00');
+					updateTable();
 					$('html, body').animate({ scrollTop: 0 }, 'slow');
 					setTimeout(updateAfterRem, 700);
 				}
