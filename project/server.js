@@ -4,10 +4,11 @@ var bs = require('./booksys.js');
 // create a default booking to play with
 try {
 	bs.createBooking('09/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
+	bs.createBooking('03/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
 }
 catch (error) {
 	// eslint-disable-next-line no-console
-	console.log('Failed to create booking: ' + error);
+	console.log('Failed to create test bookings: ' + error);
 }
 
 // set up Google OAuth API
@@ -95,7 +96,7 @@ app.post('/remove', async function(req, resp) {
 		bs.removeBooking(req.body.id, id);
 	}
 	catch (error) {
-		resp.status(401).send('Error:', error);
+		resp.status(401).send('Error: ' + error);
 		return;
 	}
 	resp.send('Successfully removed booking ' + req.body.id);

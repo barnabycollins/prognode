@@ -4874,7 +4874,7 @@ $('#bookingform').submit(async function(e) {
 			data: $('#bookingform').serialize()
 		});
 		updateTable();
-		getUserBookings(idtoken);
+		getUserBookings();
 	}
 	else {
 		$('#signin-link').css('background-color', '#ff0000');
@@ -4889,8 +4889,8 @@ function unRed() {
 function hideLoad() {
 	$('#loading-screen').remove();
 }
-async function getUserBookings(token) {
-	var data = await fetch('/bookings', {headers: {'token': token}});
+async function getUserBookings() {
+	var data = await fetch('/bookings', {headers: {'token': idtoken}});
 	data = await data.json();
 	if (Object.keys(data).length > 0) {
 		showBookings(data);
@@ -4898,13 +4898,36 @@ async function getUserBookings(token) {
 }
 
 function showBookings(bookings) {
-	$('#user-bookings').html('<h2>Your upcoming bookings</h2><table id="userTable" class="table table-dark table-striped"><tr><th>Name</th><th>Date</th><th>Time</th><th>Date Made</th></tr></table>');
+	$('#user-bookings').html('<h2>Your upcoming bookings</h2><table id="userTable" class="table table-dark table-striped"><tr><th>Name</th><th>Date</th><th>Date Made</th><th></th></tr></table>');
 	for (var i of Object.keys(bookings)) {
 		var cur = bookings[i];
-		$('#userTable').append('<tr id="' + i + '"><td>' + cur.name + '</td><td>' + cur.date + '</td><td>' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td></tr>');
+		$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');
 	}
+	$('.rem-btn').each(function() {
+		this.addEventListener('click', async function() {
+			var elem = this;
+			await $.ajax({
+				url: '/remove',
+				type: 'POST',
+				data: {
+					id: $(elem).attr('booking'),
+					user: idtoken
+				},
+				success: function() {
+					updateTable();
+					$(elem).css('background-color', '#00ff00');
+					$('html, body').animate({ scrollTop: 0 }, 'slow');
+					setTimeout(updateAfterRem, 700);
+				}
+			});
+		});
+	});
 }
 
+function updateAfterRem() {
+	$('#user-bookings').html('');
+	getUserBookings();
+}
 // define function for sorting bookings by date booking was made (to determine priority)
 // repeated items take priority
 /* var sortByDates = function(row1, row2) {
@@ -4944,12 +4967,12 @@ document.addEventListener('DOMContentLoaded', function() {
 				var profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
 				$('#user-img').attr('src', profile.getImageUrl());
-				$('#usr-name').html(profile.getName());
+				$('#user-name').html(profile.getName());
 				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
 				getUserBookings(idtoken);
 			}, function(error) {
-				$('#usr-name').html(JSON.stringify(error, undefined, 2));
+				$('#user-name').html(JSON.stringify(error, undefined, 2));
 			}
 		);
 	});

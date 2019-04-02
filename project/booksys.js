@@ -192,8 +192,8 @@ function removeBooking(id, user) {
 
 
 /**
- * 
- * @param {string} token 
+ * Gets all bookings, or the bookings for a user if one is given
+ * @param {string} user 
  */
 function getBookings(user) {
 	var i, j, content = {};

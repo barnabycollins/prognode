@@ -75,10 +75,23 @@ footer {
 #signin-link:hover #user-img {
     box-shadow: 0px 0px 5px 1px #333;
 }
-#usr-name {
+#user-name {
     font-size: 18px;
     line-height: 18px;
     vertical-align: middle;
+}
+.rem-btn {
+    transition: background-color 0.5s ease;
+    text-align: center;
+    width: 100px;
+    cursor: pointer;
+}
+.rem-btn:hover {
+    background-color: #ff0000;
+}
+.rembook {
+    appearance: none;
+    -webkit-appearance: none;
 }
 div#timetable-container ::-webkit-scrollbar {
     width: 10px;
