@@ -2,7 +2,6 @@ var express = require('express');
 var bs = require('./booksys.js');
 
 // create a default booking to play with
-
 try {
 	bs.createBooking('09/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
 }
@@ -23,6 +22,8 @@ async function verify(token) {
 	const payload = await ticket.getPayload();
 	return payload;
 }
+
+
 
 // NODE SERVER
 var app = express();
@@ -94,7 +95,7 @@ app.post('/remove', async function(req, resp) {
 		bs.removeBooking(req.body.id, id);
 	}
 	catch (error) {
-		resp.send('Error:', error);
+		resp.status(401).send('Error:', error);
 		return;
 	}
 	resp.send('Successfully removed booking ' + req.body.id);

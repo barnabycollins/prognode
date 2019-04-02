@@ -1,5 +1,7 @@
 var moment = require('moment');
 
+
+
 class User {
 	/**
 	* Class for a user
@@ -13,6 +15,8 @@ class User {
 		this.email = email;
 	}
 }
+
+
 
 class Booking {
 	/**
@@ -35,6 +39,8 @@ class Booking {
 		this.name = name;
 	}
 }
+
+
 
 /**
 * Create new booking
@@ -97,6 +103,8 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	bookings[bookId] = toAdd;
 }
 
+
+
 /**
  * Register booking to bookedTimes
  * @param {object} booking booking to add
@@ -142,6 +150,8 @@ function registerBooking(booking, id) {
 	}
 }
 
+
+
 /**
  * Removes a booking from bookings and bookedTimes
  * @param {number} id id of the booking to remove
@@ -179,6 +189,8 @@ function removeBooking(id, user) {
 	bookingpool.push(id);
 }
 
+
+
 /**
  * 
  * @param {string} token 
@@ -205,6 +217,8 @@ function getBookings(user) {
 	return content;
 }
 
+
+
 /**
  * Converts booking objects to Unix timestamps
  * @param {Object} booking booking to convert to a timestamp
@@ -212,6 +226,7 @@ function getBookings(user) {
 function getTimestamps(booking) {
 	return [moment(booking.date + ' ' + booking.STime, 'DD/MM/YYYY HH:mm'), moment(booking.date + ' ' + booking.ETime, 'DD/MM/YYYY HH:mm')];
 }
+
 
 
 /**
