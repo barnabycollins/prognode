@@ -4898,6 +4898,7 @@ async function getUserBookings() {
 }
 
 function showBookings(bookings) {
+	$('#userTable tr:not(:first)').remove();
 	for (var i of Object.keys(bookings)) {
 		var cur = bookings[i];
 		$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');

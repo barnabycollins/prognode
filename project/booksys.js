@@ -245,4 +245,4 @@ var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
 
-module.exports = {createBooking, removeBooking, getBookings, getState, bookings};
+module.exports = {createBooking, removeBooking, getBookings, getState};
