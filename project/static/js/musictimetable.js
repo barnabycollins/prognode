@@ -106,7 +106,6 @@ async function getUserBookings() {
 }
 
 function showBookings(bookings) {
-	$('#user-bookings').html('<h2>Your upcoming bookings</h2><table id="userTable" class="table table-dark table-striped"><tr><th>Name</th><th>Date</th><th>Date Made</th><th></th></tr></table>');
 	for (var i of Object.keys(bookings)) {
 		var cur = bookings[i];
 		$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');
@@ -180,6 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
 				getUserBookings(idtoken);
+				$('#user-content').show();
 			}, function(error) {
 				$('#user-name').html(JSON.stringify(error, undefined, 2));
 			}

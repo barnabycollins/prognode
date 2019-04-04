@@ -25,20 +25,57 @@
 			Loading data...
 		</div>
 		<br>
-		<h2>Make a booking</h2>
-		<form id="bookingform">
-			<input type="text" id="datepicker" name="date">
-			<input type="text" id="timepicker1" name="stime">
-			<input type="text" id="timepicker2" name="etime">
-			<input type="text" name="name">
-			<input type="hidden" id="idbox" name="id" value="null">
-			<input type="hidden" name="recurrence" value="off">
-			<input type="checkbox" name="recurrence">
-			<button type="submit">Submit</button>
-		</form>
+		<div class="row" id="user-content" style="display: none;">
+			<div class="col-lg-5">
+				<div>
+					<h2>Make a booking</h2>
+					<form id="bookingform">
+						<input type="hidden" id="idbox" name="id" value="null">
+						<input type="hidden" name="recurrence" value="off">
+						<table>
+							<tr>
+								<th>Date (DD/MM/YYYY)</th>
+								<td><input type="text" id="datepicker" name="date"></td>
+							</tr>
+							<tr>
+								<th>Start time (HH:mm)</th>
+								<td><input type="text" id="timepicker1" name="stime"></td>
+							</tr>
+							<tr>
+								<th>End time (HH:mm)</th>
+								<td><input type="text" id="timepicker2" name="etime"></td>
+							</tr>
+							<tr>
+								<th>Booking name</th>
+								<td><input type="text" name="name"></td>
+							</tr>
+							<tr>
+								<th>Recurring?</th>
+								<td><input type="checkbox" name="recurrence"></td>
+							</tr>
+							<tr>
+								<td colspan="2"><button type="submit">Submit</button></td>
+							</tr>
+						</table>
+					</form>
+				</div>
+			</div>
+			<div class="col-lg-7">
+				<div>
+					<h2>Your upcoming bookings</h2>
+					<table id="userTable" class="table table-dark table-striped">
+						<tr>
+							<th>Name</th>
+							<th>Date</th>
+							<th>Date Made</th>
+							<th></th>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
 		<br>
 		<br>
-		<div id="user-bookings"></div>
 	</div>
 
 	<!--<footer>

@@ -1,104 +1,127 @@
+@media (min-width: 1350px) {
+	.container {
+		max-width: 1300px;
+	}
+}
+
 body {
-    margin: 0px;
-    background-color: #333!important;
-    color: #ccc!important;
+	margin: 0px;
+	background-color: #333!important;
+	color: #ccc!important;
 }
 #timetable {
-    width: 100%;
-    table-layout: fixed;
-    box-shadow: 0px 0px 40px -10px #000;
-    color: #ccc;
-    word-wrap: break-word;
+	width: 100%;
+	table-layout: fixed;
+	box-shadow: 0px 0px 40px -10px #000;
+	color: #ccc;
+	word-wrap: break-word;
 }
 #timetable-header th {
-    text-align: center;
+	text-align: center;
 }
 .width-normaliser {
-    width: 100px;
+	width: 100px;
 }
 .content-div {
-    margin-bottom: 3%;
+	margin-bottom: 3%;
 }
 .time-header {
-    text-align: center;
-    border-right: 1px solid;
+	text-align: center;
+	border-right: 1px solid;
 }
 footer {
-    background-color: #222;
-    padding: 3% 0px;
+	background-color: #222;
+	padding: 3% 0px;
 }
 .mon-col {
-    border-left: 1px solid;
+	border-left: 1px solid;
 }
 #loading-screen {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-color: #444;
-    display:flex;
-    text-align: center;
-    justify-content:center;
-    align-items:center;
-    transition: opacity 0.8s;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: #444;
+	display:flex;
+	text-align: center;
+	justify-content:center;
+	align-items:center;
+	transition: opacity 0.8s;
 }
 #loadtext a {
-    color: #ccc;
-    text-decoration: underline;
+	color: #ccc;
+	text-decoration: underline;
 }
 #loadtext a:hover {
-    color: #aaa;
+	color: #aaa;
 }
 #signin-link {
-    display: flex;
-    align-items: center;
-    background-color: #444;
-    border-radius: 5px;
-    padding: 5px;
-    padding-right: 10px;
-    display: inline-block;
-    transition: background-color 0.5s ease;
-    cursor: pointer;
+	display: flex;
+	align-items: center;
+	background-color: #444;
+	border-radius: 5px;
+	padding: 5px;
+	padding-right: 10px;
+	display: inline-block;
+	transition: background-color 0.5s ease;
+	cursor: pointer;
 }
 #signin-link:hover {
-    background-color: #555;
-    text-decoration: underline;
+	background-color: #555;
+	text-decoration: underline;
 }
 #user-img {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    border-radius: 50%;
-    transition: box-shadow 1s ease;
+	width: 30px;
+	height: 30px;
+	margin-right: 10px;
+	border-radius: 50%;
+	transition: box-shadow 1s ease;
 }
 #signin-link:hover #user-img {
-    box-shadow: 0px 0px 5px 1px #333;
+	box-shadow: 0px 0px 5px 1px #333;
 }
 #user-name {
-    font-size: 18px;
-    line-height: 18px;
-    vertical-align: middle;
+	font-size: 18px;
+	line-height: 18px;
+	vertical-align: middle;
 }
-.rem-btn {
-    transition: background-color 0.5s ease;
-    text-align: center;
-    width: 100px;
-    cursor: pointer;
+td.rem-btn {
+	transition: background-color 0.5s ease;
+	text-align: center;
+	vertical-align: middle;
+	width: 80px;
+	cursor: pointer;
 }
 .rem-btn:hover {
-    background-color: #ff0000;
+	background-color: #ff0000;
 }
 .rembook {
-    appearance: none;
-    -webkit-appearance: none;
+	appearance: none;
+	-webkit-appearance: none;
 }
 div#timetable-container ::-webkit-scrollbar {
-    width: 10px;
+	width: 10px;
 }
 div#timetable-container ::-webkit-scrollbar-track {
-    background-color: #212529;
+	background-color: #212529;
 }
 div#timetable-container ::-webkit-scrollbar-thumb {
-    background-color: #444;
+	background-color: #444;
+}
+#user-content div div {
+	background-color: #2a2a2a;
+	border-radius: 5px;
+	padding: 10px;
+	height: 100%;
+}
+#userTable {
+	margin: 0px;
+}
+#bookingform table {
+	width: 100%;
+}
+#bookingform td {
+	text-align: right;
+	height: 40px;
 }
