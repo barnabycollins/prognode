@@ -4,5 +4,8 @@ check bookings in future weeks (?)
 make page properly mobile-responsive
 make forms more aesthetic / usable
 permissions
+    recurrences
+    multiple bookings per week
+    deleting other's bookings (max permissions, admin level)
 handle blocked Google popup
 show current time in UI?
