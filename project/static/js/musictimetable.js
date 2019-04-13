@@ -11,7 +11,7 @@ async function updateTable() {
 	data = await data.json();
 	
 	process(data);
-	setTimeout(updateTable, 3600000);
+	setTimeout(updateTable, 600000);	// update again in 10 minutes
 }
 
 function process(bookings) {
@@ -100,13 +100,16 @@ function hideLoad() {
 async function getUserBookings() {
 	var data = await fetch('/bookings', {headers: {'token': idtoken}});
 	data = await data.json();
+	$('#userTable tr:not(:first)').remove();
 	if (Object.keys(data).length > 0) {
 		showBookings(data);
+	}
+	else {
+		$('#userTable').append('<tr><td colspan=4>No bookings found</td></tr>');
 	}
 }
 
 function showBookings(bookings) {
-	$('#userTable tr:not(:first)').remove();
 	for (var i of Object.keys(bookings)) {
 		var cur = bookings[i];
 		$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');

@@ -3,8 +3,8 @@ var bs = require('./booksys.js');
 
 // create a default booking to play with
 try {
-	bs.createBooking('09/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
-	bs.createBooking('03/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
+	bs.createBooking('14/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
+	bs.createBooking('18/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
 }
 catch (error) {
 	// eslint-disable-next-line no-console
