@@ -12,7 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
-    "express-session": "^1.16.1",
     "google-auth-library": "^3.1.2",
     "moment": "^2.24.0"
   },

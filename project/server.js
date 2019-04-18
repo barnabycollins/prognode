@@ -31,6 +31,7 @@ var app = express();
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.static('static'));
+app.use(session({secret: 'bananas'}));
 
 /* GETTING BOOKINGS */
 app.get('/bookings', async function(req, resp) {

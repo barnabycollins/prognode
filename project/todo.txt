@@ -3,7 +3,6 @@ test UI booking deletions
 check bookings in future weeks (?)
 make page properly mobile-responsive
 make forms more aesthetic / usable
-session handling
 permissions
     recurrences
     multiple bookings per week
