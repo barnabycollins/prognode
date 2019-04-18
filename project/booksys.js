@@ -54,7 +54,7 @@ class Booking {
 function createBooking(date, STime, ETime, name, user, recurrence) {
 	var recurrencedict = {'on': true, 'off': false};
 
-	// pull information from user object
+	// pull name from user object if necessary
 	if (!name) {
 		name = user['name'];
 	}
@@ -81,8 +81,16 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 		throw 'End is before start';
 	}
 
+	// only allow recurrence if they have the permissions for it
+	if (getPerms(id) < 2) {
+		recurrence = false;
+	}
+	else {
+		recurrence = recurrencedict[recurrence];
+	}
+
 	// make booking object
-	var toAdd = new Booking(Date.now(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrencedict[recurrence], name);
+	var toAdd = new Booking(Date.now(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name);
 	var bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();
@@ -163,7 +171,7 @@ function removeBooking(id, user) {
 	}
 
 	var booking = bookings[id];
-	if (user != booking.id && UserList[user] < 9) {
+	if (user != booking.id && getPerms(user) < 9) {
 		throw 'You don\'t have permission to delete that booking';
 	}
 
@@ -230,6 +238,22 @@ function getTimestamps(booking) {
 
 
 /**
+ * Returns the permission level of a user
+ * @param {object} id 
+ */
+function getPerms(id) {
+	var user = UserList[id];
+	if (user) {
+		return user.permissionLevel;
+	}
+	else {
+		return 0;
+	}
+}
+
+
+
+/**
  * DEBUG: returns the full state of the booking system
  */
 function getState() {
@@ -245,4 +269,4 @@ var bookings = {};		// object to store bookings in
 var bookingnum = 1;		// counter to store the current booking index
 var bookingpool = [];	// queue to store the pool of free booking numbers
 
-module.exports = {createBooking, removeBooking, getBookings, getState};
+module.exports = {createBooking, removeBooking, getBookings, getState, getPerms};

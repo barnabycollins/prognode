@@ -3,8 +3,8 @@ var bs = require('./booksys.js');
 
 // create a default booking to play with
 try {
-	bs.createBooking('14/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
-	bs.createBooking('18/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
+	bs.createBooking('23/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
+	bs.createBooking('19/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
 }
 catch (error) {
 	// eslint-disable-next-line no-console
@@ -31,7 +31,6 @@ var app = express();
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.static('static'));
-app.use(session({secret: 'bananas'}));
 
 /* GETTING BOOKINGS */
 app.get('/bookings', async function(req, resp) {
@@ -92,6 +91,7 @@ app.post('/remove', async function(req, resp) {
 	}
 	catch (error) {
 		resp.status(401).send('Error: failed to verify your Google account');
+		return;
 	}
 	try {
 		bs.removeBooking(req.body.id, id);
@@ -101,6 +101,19 @@ app.post('/remove', async function(req, resp) {
 		return;
 	}
 	resp.send('Successfully removed booking ' + req.body.id);
+});
+
+/* GET PERMS FOR A USER ACCOUNT */
+app.get('/perms', async function(req, resp) {
+	try {
+		var user = await verify(req.header('token'));
+		var id = user['sub'];
+	}
+	catch (error) {
+		resp.status(401).send('Error: failed to verify your Google account');
+		return;
+	}
+	resp.send(bs.getPerms(id).toString());
 });
 
 /* DEBUG: GET FULL STATE */

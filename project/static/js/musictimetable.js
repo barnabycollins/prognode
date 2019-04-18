@@ -1,6 +1,6 @@
 var moment = require('moment');
 var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-var idtoken;
+var idtoken, userLevel;
 var loggedIn = false;
 
 // tell eslint that the Google API is a thing
@@ -107,6 +107,10 @@ async function getUserBookings() {
 	else {
 		$('#userTable').append('<tr><td colspan=4>No bookings found</td></tr>');
 	}
+
+	if (userLevel >= 2) {
+		$('#recurrence').show();
+	}
 }
 
 function showBookings(bookings) {
@@ -192,13 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
 			cookiepolicy: 'single_host_origin'
 		});
 		auth2.attachClickHandler(document.getElementById('signin-link'), {},
-			function(googleUser) {
+			async function(googleUser) {
 				var profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
 				$('#user-img').attr('src', profile.getImageUrl());
 				$('#user-name').html(profile.getName());
 				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
+				var perms = await fetch('/perms', {headers: {'token': idtoken}});
+				userLevel = await perms.json();
 				getUserBookings(idtoken);
 				$('#user-content').show();
 			}, function(error) {

@@ -4,9 +4,16 @@ check bookings in future weeks (?)
 make page properly mobile-responsive
 make forms more aesthetic / usable
 permissions
-    recurrences
-    multiple bookings per week
-    deleting other's bookings (max permissions, admin level)
+    0: 3 hours of bookings per week, no recurrences, only able to modify own bookings
+    1: 5 hours of bookings per week
+    2: recurrences allowed
+    3: 5 hours of bookings per week, and recurrences allowed
+    4: unlimited bookings
+    9: deleting others' bookings (max permissions, admin level)
 handle blocked Google popup
 show current time in UI?
-deal with no connection / disconnections
+deal with no connection / disconnections (try/catch around all requests)
+standardise authentication on requests
+replace var with const where necessary
+handle errors properly (using HTML elements rather than console / alert())
+add UI / page for moderating bookings
