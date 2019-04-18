@@ -4924,6 +4924,23 @@ function showBookings(bookings) {
 					setTimeout(updateAfterRem, 700);
 				}
 			});
+			/*var response = await fetch('/remove', {
+				method: 'post',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: $(elem).attr('booking'),
+					user: idtoken
+				})
+			});
+			console.log(response)
+			if (response.ok) {
+				$(elem).css('background-color', '#00ff00');
+				updateTable();
+				$('html, body').animate({ scrollTop: 0 }, 'slow');
+				setTimeout(updateAfterRem, 700);
+			}*/
 		});
 	});
 }
