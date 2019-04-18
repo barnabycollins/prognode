@@ -17,3 +17,9 @@ standardise authentication on requests
 replace var with const where necessary
 handle errors properly (using HTML elements rather than console / alert())
 add UI / page for moderating bookings
+return updated content with POST requests
+look into pretty printing and supporting gzip responses
+switch to appropriate query types (put, patch, delete)
+rate limiting
+switch to more legible booking creation dates
+use 201, 204
