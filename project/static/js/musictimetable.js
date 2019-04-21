@@ -77,7 +77,7 @@ $('#bookingform').submit(async function(e) {
 	e.preventDefault();
 	if (loggedIn) {
 		await $.ajax({
-			url: '/new',
+			url: '/bookings',
 			type: 'POST',
 			data: $('#bookingform').serialize()
 		});
@@ -122,7 +122,7 @@ function showBookings(bookings) {
 		this.addEventListener('click', async function() {
 			var elem = this;
 			$(elem).css('background-color', '#ff0000');
-			await $.ajax({
+			/* await $.ajax({
 				url: '/remove',
 				type: 'POST',
 				data: {
@@ -135,24 +135,20 @@ function showBookings(bookings) {
 					$('html, body').animate({ scrollTop: 0 }, 'slow');
 					setTimeout(updateAfterRem, 700);
 				}
-			});
-			/*var response = await fetch('/remove', {
-				method: 'post',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					id: $(elem).attr('booking'),
-					user: idtoken
-				})
-			});
-			console.log(response)
-			if (response.ok) {
-				$(elem).css('background-color', '#00ff00');
-				updateTable();
-				$('html, body').animate({ scrollTop: 0 }, 'slow');
-				setTimeout(updateAfterRem, 700);
-			}*/
+			}); */
+
+			try {
+				await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+			}
+			catch (error) {
+				// TODO: handle error and that
+				return;
+			}
+
+			$(elem).css('background-color', '#00ff00');
+			updateTable();
+			$('html, body').animate({ scrollTop: 0 }, 'slow');
+			setTimeout(updateAfterRem, 700);
 		});
 	});
 }

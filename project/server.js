@@ -4,7 +4,7 @@ var bs = require('./booksys.js');
 // create a default booking to play with
 try {
 	bs.createBooking('23/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, 'off');
-	bs.createBooking('19/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
+	bs.createBooking('25/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, 'off');
 }
 catch (error) {
 	// eslint-disable-next-line no-console
@@ -46,7 +46,7 @@ app.get('/bookings', async function(req, resp) {
 			return;
 		}
 	}
-	resp.send(bs.getBookings(user));
+	resp.send(JSON.stringify(bs.getBookings(user), null, 4));
 });
 
 /* ADD OR UPDATE USER ENTRY */
@@ -64,7 +64,7 @@ app.get('/bookings', async function(req, resp) {
 }); */
 
 /* NEW BOOKING */
-app.post('/new', async function(req, resp) {
+app.post('/bookings', async function(req, resp) {
 	try {
 		var user = await verify(req.body.id);
 	}
@@ -80,13 +80,13 @@ app.post('/new', async function(req, resp) {
 		resp.status(409).send('Error: failed to create your booking: ' + error);
 		return;
 	}
-	resp.send('Successfully added your booking to the database.');
+	resp.status(201).send('Successfully added your booking to the database.');
 });
 
 /* REMOVE BOOKING */
-app.post('/remove', async function(req, resp) {
+app.delete('/bookings', async function(req, resp) {
 	try {
-		var user = await verify(req.body.user);
+		var user = await verify(req.header('token'));
 		var id = user['sub'];
 	}
 	catch (error) {
@@ -94,13 +94,13 @@ app.post('/remove', async function(req, resp) {
 		return;
 	}
 	try {
-		bs.removeBooking(req.body.id, id);
+		bs.removeBooking(req.header('id'), id);
 	}
 	catch (error) {
 		resp.status(401).send('Error: ' + error);
 		return;
 	}
-	resp.send('Successfully removed booking ' + req.body.id);
+	resp.send('Successfully removed booking ' + req.header('id'));
 });
 
 /* GET PERMS FOR A USER ACCOUNT */
