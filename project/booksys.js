@@ -52,7 +52,6 @@ class Booking {
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(date, STime, ETime, name, user, recurrence) {
-	var recurrencedict = {'on': true, 'off': false};
 
 	// pull name from user object if necessary
 	if (!name) {
@@ -85,12 +84,9 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	if (getPerms(id) < 2) {
 		recurrence = false;
 	}
-	else {
-		recurrence = recurrencedict[recurrence];
-	}
 
 	// make booking object
-	var toAdd = new Booking(Date.now(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name);
+	var toAdd = new Booking(Date.now(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name.substring(0, 32));
 	var bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();

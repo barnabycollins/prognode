@@ -20,6 +20,7 @@ add UI / page for moderating bookings
 return updated content with POST requests
 look into pretty printing and supporting gzip responses
 switch to appropriate query types (put, patch, delete)
+switch ajax to fetch() [post booking esp]
 rate limiting
 switch to more legible booking creation dates
 use 201, 204

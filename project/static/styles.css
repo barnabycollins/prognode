@@ -19,8 +19,11 @@ body {
 #timetable-header th {
 	text-align: center;
 }
+#timetable td {
+	word-break: break-all;
+}
 .width-normaliser {
-	width: 100px;
+	width: 110px;
 }
 .content-div {
 	margin-bottom: 3%;

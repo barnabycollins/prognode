@@ -76,11 +76,34 @@ function process(bookings) {
 $('#bookingform').submit(async function(e) {
 	e.preventDefault();
 	if (loggedIn) {
-		await $.ajax({
+		/*await $.ajax({
 			url: '/bookings',
 			type: 'POST',
 			data: $('#bookingform').serialize()
+		});*/
+		
+		var formJSON = {};
+		$('#bookingform input').each(function() {
+			var elem = $(this);
+			var val;
+			if (elem.attr('name') == 'recurrence') {
+				val = elem.prop('checked');
+			}
+			else {
+				val = elem.val();
+			}
+			formJSON[elem.attr('name')] = val;
 		});
+
+		await fetch('/bookings', {
+			method: 'post',
+			headers: {
+				'token': idtoken,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(formJSON, null, 4)
+		});
+
 		updateTable();
 		getUserBookings();
 	}
@@ -197,7 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
 				idtoken = googleUser.getAuthResponse().id_token;
 				$('#user-img').attr('src', profile.getImageUrl());
 				$('#user-name').html(profile.getName());
-				$('#idbox').attr('value', idtoken);
 				loggedIn = true;
 				var perms = await fetch('/perms', {headers: {'token': idtoken}});
 				userLevel = await perms.json();
