@@ -5,8 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js",
-    "start-dev": "start nodemon server.js && start watchify static/js/musictimetable.js -o static/js/bundle.js"
+    "start": "node server.js",
+    "start-dev": "start nodemon server.js && start watchify static/js/musictimetable.js -o static/js/bundle.js",
+    "push-heroku": "cd .. && git subtree push --prefix project heroku master"
   },
   "author": "Barnaby Collins",
   "license": "ISC",
