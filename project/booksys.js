@@ -1,4 +1,6 @@
 var moment = require('moment');
+var fs = require('fs');
+var datafile = 'data.json';
 
 
 
@@ -105,6 +107,7 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 
 	// if we added the booking successfully, add it to the database
 	bookings[bookId] = toAdd;
+	saveToDisk();
 }
 
 
@@ -191,6 +194,8 @@ function removeBooking(id, user) {
 	// remove booking from bookings database and release the id back to the pool
 	delete bookings[id];
 	bookingpool.push(id);
+
+	saveToDisk();
 }
 
 
@@ -219,6 +224,31 @@ function getBookings(user) {
 	}
 
 	return content;
+}
+
+
+
+
+function saveToDisk() {
+	var struct = {
+		'bookings': bookings,
+		'UserList': UserList,
+		'bookedTimes': bookedTimes,
+		'bookingnum': bookingnum,
+		'bookingpool': bookingpool
+	};
+	try {
+		fs.writeFile(datafile, JSON.stringify(struct, null, 4), 'utf8', function(err) {
+			if (err) {
+				// eslint-disable-next-line no-console
+				console.log('Failed to write JSON to file -', err);
+			}
+		});
+	}
+	catch (error) {
+		// eslint-disable-next-line no-console
+		console.log('Failed to write JSON to file -', error);
+	}
 }
 
 
@@ -256,13 +286,32 @@ function getState() {
 	return {'bookings': bookings, 'bookedTimes': bookedTimes, 'bookingnum': bookingnum, 'bookingpool': bookingpool, 'UserList': UserList};
 }
 
-// initialise structures
-var UserList = {		// object to store registered users
-	'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com')
-};
-var bookedTimes = {};	// object to store what times are booked so we can check for clashes
-var bookings = {};		// object to store bookings in
-var bookingnum = 1;		// counter to store the current booking index
-var bookingpool = [];	// queue to store the pool of free booking numbers
+var completed = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
+try {
+	if (fs.exists(datafile)) {
+		var struct = JSON.parse(fs.readFile(datafile));
+		bookings = struct['bookings'];
+		UserList = struct['UserList'];
+		bookedTimes = struct['bookedTimes'];
+		bookingnum = struct['bookingnum'];
+		bookingpool = struct['bookingpool'];
+	}
+	completed = true;
+}
+catch (error) {
+	// eslint-disable-next-line no-console
+	console.log('Error: failed to check for data file -', error);
+}
+
+if (!completed) {
+	// initialise structures
+	UserList = {		// object to store registered users
+		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com')
+	};
+	bookedTimes = {};	// object to store what times are booked so we can check for clashes
+	bookings = {};		// object to store bookings in
+	bookingnum = 1;		// counter to store the current booking index
+	bookingpool = [];	// queue to store the pool of free booking numbers
+}
 
 module.exports = {createBooking, removeBooking, getBookings, getState, getPerms};
