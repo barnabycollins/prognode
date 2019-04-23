@@ -24,7 +24,7 @@ async function verify(token) {
 	return payload;
 }
 
-
+const port = process.env.PORT || 8080;
 
 // NODE SERVER
 var app = express();
@@ -125,4 +125,4 @@ app.get('*', function(req, resp) {
 	resp.send('no');
 });
 
-app.listen(80);
+app.listen(port);
