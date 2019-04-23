@@ -125,4 +125,4 @@ app.get('*', function(req, resp) {
 	resp.send('no');
 });
 
-app.listen(8080);
+app.listen(80);
