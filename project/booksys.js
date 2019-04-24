@@ -131,26 +131,27 @@ function registerBooking(booking, id) {
 	else if (bookedTimes[year][day] == undefined) {
 		bookedTimes[year][day] = {};
 	}
+	
 	// for each hour of the booking
 	for (var j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
-		// if we don't yet have anything else booked then, remember it's booked now
-		if (!bookedTimes[year][day][j]) {
+		if (bookedTimes[year][day][j] === undefined) {
+			// if we don't yet have anything else booked then, remember it's booked now
 			bookedTimes[year][day][j] = id;
 		}
-		// if there's a clash
 		else {
 			try {
 				// remove that booking and try adding the current booking again
-				removeBooking(bookedTimes[year][day][j], id);
+				removeBooking(bookedTimes[year][day][j], booking.id);
 				registerBooking(booking, id);
+				break;
 			}
-			catch(error) {
+			catch (error) {
 				// if we fail to remove the clashing booking(s)
 				for (var k = bookingtimes[0].hour(); k < j; k++) {
 					// remove past entries in bookedTimes and put the id back in the bookingpool
 					delete bookedTimes[year][day][j];
-					bookingpool.push(id);
 				}
+				bookingpool.push(id);
 				throw error;
 			}
 		}
@@ -166,12 +167,12 @@ function registerBooking(booking, id) {
  */
 function removeBooking(id, user) {
 	if (!(id in bookings)) {
-		throw 'Booking being removed does not exist';
+		throw 'Failed to remove booking: booking ' + id + ' does not exist';
 	}
 
 	var booking = bookings[id];
 	if (user != booking.id && getPerms(user) < 9) {
-		throw 'You don\'t have permission to delete that booking';
+		throw 'You don\'t have permission to delete that booking: booking registered to ID ' + booking.id + ' being deleted by user ' + user;
 	}
 
 	var bookingtimes = getTimestamps(booking);
@@ -194,7 +195,6 @@ function removeBooking(id, user) {
 	// remove booking from bookings database and release the id back to the pool
 	delete bookings[id];
 	bookingpool.push(id);
-
 	saveToDisk();
 }
 
@@ -286,21 +286,23 @@ function getState() {
 	return {'bookings': bookings, 'bookedTimes': bookedTimes, 'bookingnum': bookingnum, 'bookingpool': bookingpool, 'UserList': UserList};
 }
 
+
+
 var completed = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
 try {
-	if (fs.exists(datafile)) {
-		var struct = JSON.parse(fs.readFile(datafile));
+	if (fs.existsSync(datafile)) {
+		var struct = JSON.parse(fs.readFileSync(datafile));
 		bookings = struct['bookings'];
 		UserList = struct['UserList'];
 		bookedTimes = struct['bookedTimes'];
 		bookingnum = struct['bookingnum'];
 		bookingpool = struct['bookingpool'];
+		completed = true;
 	}
-	completed = true;
 }
 catch (error) {
 	// eslint-disable-next-line no-console
-	console.log('Error: failed to check for data file -', error);
+	console.log('Error: failed to read data file -', error);
 }
 
 if (!completed) {
@@ -312,6 +314,8 @@ if (!completed) {
 	bookings = {};		// object to store bookings in
 	bookingnum = 1;		// counter to store the current booking index
 	bookingpool = [];	// queue to store the pool of free booking numbers
+	completed = true;
+	saveToDisk();
 }
 
-module.exports = {createBooking, removeBooking, getBookings, getState, getPerms};
+module.exports = {createBooking, removeBooking, getBookings, getState, getPerms, completed};

@@ -24,3 +24,4 @@ switch ajax to fetch() [post booking esp]
 rate limiting
 switch to more legible booking creation dates
 use 201, 204
+switch to let instead of var
