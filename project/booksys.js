@@ -288,7 +288,7 @@ function getState() {
 
 
 
-var completed = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
+var ready = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
 try {
 	if (fs.existsSync(datafile)) {
 		var struct = JSON.parse(fs.readFileSync(datafile));
@@ -297,7 +297,7 @@ try {
 		bookedTimes = struct['bookedTimes'];
 		bookingnum = struct['bookingnum'];
 		bookingpool = struct['bookingpool'];
-		completed = true;
+		ready = true;
 	}
 }
 catch (error) {
@@ -305,7 +305,7 @@ catch (error) {
 	console.log('Error: failed to read data file -', error);
 }
 
-if (!completed) {
+if (!ready) {
 	// initialise structures
 	UserList = {		// object to store registered users
 		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com')
@@ -314,8 +314,8 @@ if (!completed) {
 	bookings = {};		// object to store bookings in
 	bookingnum = 1;		// counter to store the current booking index
 	bookingpool = [];	// queue to store the pool of free booking numbers
-	completed = true;
+	ready = true;
 	saveToDisk();
 }
 
-module.exports = {createBooking, removeBooking, getBookings, getState, getPerms, completed};
+module.exports = {createBooking, removeBooking, getBookings, getState, getPerms, ready};

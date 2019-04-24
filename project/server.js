@@ -1,7 +1,7 @@
 var express = require('express');
 var bs = require('./booksys.js');
 
-while (!bs.completed) {
+while (!bs.ready) {
 	continue;
 }
 
