@@ -7,8 +7,8 @@ while (!bs.ready) {
 
 // create default bookings to play with
 try {
-	bs.createBooking('23/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, false);
-	bs.createBooking('25/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, false);
+	bs.createBooking('28/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, false);
+	bs.createBooking('29/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, false);
 }
 catch (error) {
 	// eslint-disable-next-line no-console
