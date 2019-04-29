@@ -16,3 +16,4 @@ rate limiting
 use 201, 204
 remove flashing login button code
 make sure content-type is correct when sending stringified JSON
+sign out
