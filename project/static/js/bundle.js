@@ -4603,193 +4603,6 @@
 })));
 
 },{}],2:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],3:[function(require,module,exports){
-(function (process){
 const moment = require('moment');
 const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 let idtoken, userLevel;
@@ -4799,15 +4612,22 @@ let toastCount = 0;
 // tell eslint that the Google API is a thing
 /* global gapi */
 
+/**
+ * Pull all bookings from the server and put them in the main table
+ */
 async function updateTable() {
-	let data = await fetch('/bookings');
-	data = await data.json();
-	
-	process(data);
-	setTimeout(updateTable, 600000);	// update again in 10 minutes
-}
+	try {
+		let response = await fetch('/bookings');
+		if (!response.ok) {
+			throw await response.text();
+		}
+		var bookings = await response.json();
+	}
+	catch (error) {
+		makeToast('Failed to get bookings', error);
+	}
 
-function process(bookings) {
+	/* PROCESS RECEIVED BOOKINGS */
 	// add table inside #timetable-container with header row and initial box
 	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped table-responsive\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
 
@@ -4816,7 +4636,7 @@ function process(bookings) {
 	let i, j;
 
 	for (i = 0; i < 21; i++) {
-		$('#timetable-header').append('<th><div class=\'width-normaliser\'>'+days[(i+today.isoWeekday()-1)%7]+'</div>' + moment(today).add(i, 'days').format('DD/MM') + '</th>');
+		$('#timetable-header').append('<th><div class=\'width-normaliser\'>' + days[(i+today.isoWeekday()-1)%7] + '</div>' + moment(today).add(i, 'days').format('DD/MM') + '</th>');
 	}
 
 	for (j = 10; j < 22; j++) {
@@ -4864,8 +4684,12 @@ function process(bookings) {
 	}
 	$('#loading-screen').css('opacity', '0');
 	setTimeout(hideLoad, 1000);
+	setTimeout(updateTable, 600000);	// update again in 10 minutes
 }
 
+/**
+ * When a booking is submitted
+ */
 $('#bookingform').submit(async function(e) {
 	e.preventDefault();
 	if (loggedIn) {
@@ -4904,25 +4728,32 @@ $('#bookingform').submit(async function(e) {
 		getUserBookings();
 	}
 	else {
-		$('#signin-link').css('background-color', '#ff0000');
-		setTimeout(unRed, 500);
+		makeToast('You\'re not logged in!', 'Use the button in the top left to log in with a Google account');
 	}
 });
 
+/**
+ * Make a toast notification (usually for an error)
+ * @param {string} title title for the toast notification
+ * @param {string} message message for the toast notification
+ */
 function makeToast(title, message) {
 	let toastStr = '<div id="toast-' + toastCount.toString() + '" class="toast" data-autohide="false"><div class="toast-header"><strong class="mr-auto">' + title + '</strong><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="toast-body">' + message + '</div></div>';
 	$('#toast-container').append(toastStr);
 	$('#toast-' + toastCount.toString()).toast('show');
-
+	toastCount++;
 }
 
-function unRed() {
-	$('#signin-link').css('background-color', '');
-}
-
+/**
+ * Hide the loading screen
+ */
 function hideLoad() {
 	$('#loading-screen').remove();
 }
+
+/**
+ * Get the bookings for the logged in user and populate them in the user bookings table
+ */
 async function getUserBookings() {
 	try {
 		let response = await fetch('/bookings', {headers: {'token': idtoken}});
@@ -4937,61 +4768,50 @@ async function getUserBookings() {
 		return;
 	}
 	$('#userTable tr:not(:first)').remove();
+	
+	// if the user has bookings
 	if (Object.keys(data).length > 0) {
-		showBookings(data);
+		for (let i of Object.keys(data)) {
+			let cur = data[i];
+			$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');
+		}
+		$('.rem-btn').each(function() {
+			this.addEventListener('click', async function() {
+				let elem = this;
+				$(elem).css('background-color', '#ff0000');
+	
+				try {
+					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+					if (!response.ok) {
+						makeToast('Failed to delete booking', await response.text());
+					}
+				}
+				catch (error) {
+					makeToast('Failed to delete booking', error);
+					return;
+				}
+	
+				$(elem).css('background-color', '#00ff00');
+				updateTable();
+				$('html, body').animate({ scrollTop: 0 }, 'slow');
+				setTimeout(updateAfterRem, 700);
+			});
+		});
 	}
 	else {
 		$('#userTable').append('<tr><td colspan=4>No bookings found</td></tr>');
 	}
-
-	if (userLevel >= 2) {
-		$('#recurrence').show();
-	}
 }
 
-function showBookings(bookings) {
-	for (let i of Object.keys(bookings)) {
-		let cur = bookings[i];
-		$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');
-	}
-	$('.rem-btn').each(function() {
-		this.addEventListener('click', async function() {
-			let elem = this;
-			$(elem).css('background-color', '#ff0000');
-
-			try {
-				let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
-				if (!response.ok) {
-					makeToast('Failed to delete booking', await response.text());
-				}
-			}
-			catch (error) {
-				makeToast('Failed to delete booking', error);
-				return;
-			}
-
-			$(elem).css('background-color', '#00ff00');
-			updateTable();
-			$('html, body').animate({ scrollTop: 0 }, 'slow');
-			setTimeout(updateAfterRem, 700);
-		});
-	});
-}
-
+/**
+ * Run getUserBookings() after an item is removed (after a delay to allow for the scrolling animation)
+ */
 function updateAfterRem() {
 	$('#user-bookings').html('');
 	getUserBookings();
 }
-// define function for sorting bookings by date booking was made (to determine priority)
-// repeated items take priority
-/* let sortByDates = function(row1, row2) {
-	if (row1.recurrence) return -1;
-	if (row2.recurrence) return 1;
-	if (row1.booktime > row2.booktime) return 1;
-	if (row1.booktime < row2.booktime) return -1;
-	return 0;
-}; */
 
+// set up custom booking form fields
 $('#datepicker').datepicker({
 	'format': 'dd/mm/yyyy'
 });
@@ -5008,31 +4828,50 @@ $('#timepicker2').timepicker({
 	'timeFormat': 'H\\:i'
 });
 
+// when fully loaded
 document.addEventListener('DOMContentLoaded', function() {
+	// populate the main timetable
 	updateTable();
+	
+	// set up Google sign-in
 	gapi.load('auth2', function(){
 		// Retrieve the singleton for the GoogleAuth library and set up the client.
 		let auth2 = gapi.auth2.init({
 			client_id: '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com',
 			cookiepolicy: 'single_host_origin'
 		});
+		// when a user logs in
 		auth2.attachClickHandler(document.getElementById('signin-link'), {},
 			async function(googleUser) {
+				// get profile information
 				let profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
+
+				// update login button with user details
 				$('#user-img').attr('src', profile.getImageUrl());
 				$('#user-name').html(profile.getName());
+				
+				// remember we're logged in
 				loggedIn = true;
+
+				// fetch and store permissions for the user
 				let data = await fetch('/perms', {headers: {'token': idtoken}});
 				data = await data.json();
 				userLevel = data['perms'];
-				getUserBookings(idtoken);
+				if (userLevel >= 2) {
+					$('#recurrence').show();
+				}
+
+				// get the user's bookings for display on the user table
+				getUserBookings();
+
+				// show elements for logged in users
 				$('#user-content').show();
+
 			}, function(error) {
 				makeToast('Signin failed', error['error']);
 			}
 		);
 	});
 });
-}).call(this,require('_process'))
-},{"_process":2,"moment":1}]},{},[3]);
+},{"moment":1}]},{},[2]);
