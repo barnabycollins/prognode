@@ -4790,10 +4790,11 @@ process.umask = function() { return 0; };
 
 },{}],3:[function(require,module,exports){
 (function (process){
-let moment = require('moment');
-let days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const moment = require('moment');
+const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 let idtoken, userLevel;
 let loggedIn = false;
+let toastCount = 0;
 
 // tell eslint that the Google API is a thing
 /* global gapi */
@@ -4900,6 +4901,13 @@ $('#bookingform').submit(async function(e) {
 	}
 });
 
+function makeToast(title, message) {
+	let toastStr = '<div id="toast-' + toastCount.toString() + '" class="toast" data-autohide="false"><div class="toast-header"><strong class="mr-auto">' + title + '</strong><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="toast-body">' + message + '</div></div>';
+	$('#toast-container').append(toastStr);
+	$('#toast-' + toastCount.toString()).toast('show');
+
+}
+
 function unRed() {
 	$('#signin-link').css('background-color', '');
 }
@@ -4908,8 +4916,18 @@ function hideLoad() {
 	$('#loading-screen').remove();
 }
 async function getUserBookings() {
-	let data = await fetch('/bookings', {headers: {'token': idtoken}});
-	data = await data.json();
+	try {
+		let response = await fetch('/bookings', {headers: {'token': idtoken}});
+		if (!response.ok) {
+			makeToast('Failed to get bookings', await response.text());
+			return;
+		}
+		var data = await response.json();
+	}
+	catch (error) {
+		makeToast('Failed to get bookings', error);
+		return;
+	}
 	$('#userTable tr:not(:first)').remove();
 	if (Object.keys(data).length > 0) {
 		showBookings(data);
@@ -4934,10 +4952,13 @@ function showBookings(bookings) {
 			$(elem).css('background-color', '#ff0000');
 
 			try {
-				await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+				let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+				if (!response.ok) {
+					makeToast('Failed to delete booking', await response.text());
+				}
 			}
 			catch (error) {
-				// TODO: handle error and that
+				makeToast('Failed to delete booking', error);
 				return;
 			}
 
@@ -5000,7 +5021,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				getUserBookings(idtoken);
 				$('#user-content').show();
 			}, function(error) {
-				$('#user-name').html(JSON.stringify(error, undefined, 2));
+				makeToast('Signin failed', error['error']);
 			}
 		);
 	});

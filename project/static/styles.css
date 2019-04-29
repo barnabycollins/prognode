@@ -130,3 +130,13 @@ div#timetable-container ::-webkit-scrollbar-thumb {
 	text-align: right;
 	height: 40px;
 }
+#toast-container {
+	position: fixed;
+	top: 0;
+	right: 0;
+	padding: 10px;
+	width: 20%;
+}
+.toast {
+	color: rgb(33, 37, 41);
+}
