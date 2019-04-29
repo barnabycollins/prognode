@@ -1,6 +1,7 @@
-var moment = require('moment');
-var fs = require('fs');
-var datafile = 'data.json';
+const moment = require('moment');
+const fs = require('fs');
+let datafile = 'data.json';
+let writing = false;
 
 
 
@@ -23,7 +24,7 @@ class User {
 class Booking {
 	/**
 	* Class for a booking
-	* @param {number} booktime unix timestamp for the time the booking was made (used for priority)
+	* @param {string} booktime unix timestamp for the time the booking was made (used for priority)
 	* @param {string} date date of booking
 	* @param {string} STime start time of the booking
 	* @param {string} ETime end time of the booking
@@ -59,19 +60,23 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	if (!name) {
 		name = user['name'];
 	}
-	var id = user['sub'];
-	var email = user['email'];
-	var userName = user['name'];
+	let id = user['sub'];
+	let email = user['email'];
+	let userName = user['name'];
+
+	let start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	let end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	
+	if (end.isBefore(moment())) {
+		throw 'Booking is in the past';
+	}
 	
 	// add the user to the user database if we haven't already
 	if (!(id in UserList)) {
 		UserList[id] = new User(userName, 0, email);
 	}
-
-	var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
-	var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm').startOf('hour');
-	var mintime = start.clone().hour(10);
-	var maxtime = start.clone().hour(22);
+	let mintime = start.clone().hour(10);
+	let maxtime = start.clone().hour(22);
 
 	// make sure that both start and end land in the range of 10 til 10 on the date of the start time
 	if (!(start.isBetween(mintime, maxtime, null, '[]') && end.isBetween(mintime, maxtime, null, '[]'))) {
@@ -88,8 +93,8 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	}
 
 	// make booking object
-	var toAdd = new Booking(Date.now(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name.substring(0, 32));
-	var bookId = bookingnum;
+	let toAdd = new Booking(moment().toISOString(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name.substring(0, 32));
+	let bookId = bookingnum;
 	if (bookingpool.length > 0) {
 		bookId = bookingpool.shift();
 	}
@@ -118,9 +123,9 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
  * @param {number} id id to give to the booking
  */
 function registerBooking(booking, id) {
-	var bookingtimes = getTimestamps(booking);
-	var year = bookingtimes[0].year();
-	var day = bookingtimes[0].dayOfYear();
+	let bookingtimes = getTimestamps(booking);
+	let year = bookingtimes[0].year();
+	let day = bookingtimes[0].dayOfYear();
 	
 	// if we haven't yet got an entry for the year, add one for the year and day
 	if (bookedTimes[year] == undefined) {
@@ -133,7 +138,7 @@ function registerBooking(booking, id) {
 	}
 	
 	// for each hour of the booking
-	for (var j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
+	for (let j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
 		if (bookedTimes[year][day][j] === undefined) {
 			// if we don't yet have anything else booked then, remember it's booked now
 			bookedTimes[year][day][j] = id;
@@ -147,7 +152,7 @@ function registerBooking(booking, id) {
 			}
 			catch (error) {
 				// if we fail to remove the clashing booking(s)
-				for (var k = bookingtimes[0].hour(); k < j; k++) {
+				for (let k = bookingtimes[0].hour(); k < j; k++) {
 					// remove past entries in bookedTimes and put the id back in the bookingpool
 					delete bookedTimes[year][day][j];
 				}
@@ -170,16 +175,16 @@ function removeBooking(id, user) {
 		throw 'Failed to remove booking: booking ' + id + ' does not exist';
 	}
 
-	var booking = bookings[id];
+	let booking = bookings[id];
 	if (user != booking.id && getPerms(user) < 9) {
 		throw 'You don\'t have permission to delete that booking: booking registered to ID ' + booking.id + ' being deleted by user ' + user;
 	}
 
-	var bookingtimes = getTimestamps(booking);
-	var year = bookingtimes[0].year();
-	var day = bookingtimes[0].dayOfYear();
+	let bookingtimes = getTimestamps(booking);
+	let year = bookingtimes[0].year();
+	let day = bookingtimes[0].dayOfYear();
 
-	for (var i = bookingtimes[0].hour(); i < bookingtimes[1].hour(); i++) {
+	for (let i = bookingtimes[0].hour(); i < bookingtimes[1].hour(); i++) {
 		delete bookedTimes[year][day][i];
 	}
 
@@ -205,7 +210,7 @@ function removeBooking(id, user) {
  * @param {string} user 
  */
 function getBookings(user) {
-	var i, j, content = {};
+	let i, j, content = {};
 	if (user) {
 		for (i of Object.keys(bookings)) {
 			if (bookings[i].id == user) {
@@ -230,20 +235,39 @@ function getBookings(user) {
 
 
 function saveToDisk() {
-	var struct = {
+	let struct = {
 		'bookings': bookings,
 		'UserList': UserList,
 		'bookedTimes': bookedTimes,
 		'bookingnum': bookingnum,
 		'bookingpool': bookingpool
 	};
+	
+	do {
+		try {
+			writing = true;
+			fs.writeFile(datafile, JSON.stringify(struct, null, 4), 'utf8', function(err) {
+				if (err) {
+					// eslint-disable-next-line no-console
+					console.log('Failed to write JSON to file -', err);
+				}
+			});
+			writing = false;
+		}
+		catch (error) {
+			// eslint-disable-next-line no-console
+			console.log('Failed to write JSON to file -', error);
+		}
+	} while (writing);
 	try {
+		writing = true;
 		fs.writeFile(datafile, JSON.stringify(struct, null, 4), 'utf8', function(err) {
 			if (err) {
 				// eslint-disable-next-line no-console
 				console.log('Failed to write JSON to file -', err);
 			}
 		});
+		writing = false;
 	}
 	catch (error) {
 		// eslint-disable-next-line no-console
@@ -268,7 +292,7 @@ function getTimestamps(booking) {
  * @param {object} id 
  */
 function getPerms(id) {
-	var user = UserList[id];
+	let user = UserList[id];
 	if (user) {
 		return user.permissionLevel;
 	}
@@ -288,10 +312,10 @@ function getState() {
 
 
 
-var ready = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
+let ready = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
 try {
 	if (fs.existsSync(datafile)) {
-		var struct = JSON.parse(fs.readFileSync(datafile));
+		let struct = JSON.parse(fs.readFileSync(datafile));
 		bookings = struct['bookings'];
 		UserList = struct['UserList'];
 		bookedTimes = struct['bookedTimes'];

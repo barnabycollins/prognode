@@ -1,14 +1,16 @@
-var express = require('express');
-var bs = require('./booksys.js');
+const bs = require('./booksys.js');
 
 while (!bs.ready) {
 	continue;
 }
 
+const compression = require('compression');
+const express = require('express');
+
 // create default bookings to play with
 try {
-	bs.createBooking('28/04/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, false);
-	bs.createBooking('29/04/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, false);
+	bs.createBooking('03/05/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, false);
+	bs.createBooking('01/05/2019', '16:00', '19:00', '', {'sub': '116714588086254124711', 'email': 'barnstormer322@gmail.com', 'name': 'Barnaby Collins'}, false);
 }
 catch (error) {
 	// eslint-disable-next-line no-console
@@ -31,15 +33,16 @@ async function verify(token) {
 const port = process.env.PORT || 8080;
 
 // NODE SERVER
-var app = express();
+const app = express();
 
 app.use(express.static('static'));
 app.use(express.json());
+app.use(compression());
 
 /* GETTING BOOKINGS */
 app.get('/bookings', async function(req, resp) {
-	var user;
-	var token = req.header('token');
+	let user;
+	let token = req.header('token');
 	if (token) {
 		try {
 			user = await verify(token);
@@ -56,7 +59,7 @@ app.get('/bookings', async function(req, resp) {
 /* ADD OR UPDATE USER ENTRY */
 /* app.post('/updateuser', async function(req, resp) {
 	try {
-		var user = await verify(req.body.id);
+		let user = await verify(req.body.id);
 	}
 	catch (error) {
 		resp.status(401).send('Error: Failed to verify your Google account');
@@ -83,13 +86,13 @@ app.post('/bookings', async function(req, resp) {
 		resp.status(409).send('Error: failed to create your booking: ' + error);
 		return;
 	}
-	resp.status(201).send('Successfully added your booking to the database.');
+	resp.status(201).send(JSON.stringify(bs.getBookings(user), null, 4));
 });
 
 /* REMOVE BOOKING */
 app.delete('/bookings', async function(req, resp) {
 	try {
-		var user = await verify(req.header('token'));
+		let user = await verify(req.header('token'));
 		var id = user['sub'];
 	}
 	catch (error) {
@@ -109,14 +112,14 @@ app.delete('/bookings', async function(req, resp) {
 /* GET PERMS FOR A USER ACCOUNT */
 app.get('/perms', async function(req, resp) {
 	try {
-		var user = await verify(req.header('token'));
+		let user = await verify(req.header('token'));
 		var id = user['sub'];
 	}
 	catch (error) {
 		resp.status(401).send('Error: failed to verify your Google account');
 		return;
 	}
-	resp.send(bs.getPerms(id).toString());
+	resp.send(JSON.stringify({'perms': bs.getPerms(id)}, null, 4));
 });
 
 /* DEBUG: GET FULL STATE */
@@ -126,7 +129,7 @@ app.get('/all', function(req, resp) {
 
 /* OTHERWISE */
 app.get('*', function(req, resp) {
-	resp.send('no');
+	resp.status(404).send('404: No resource found at this location');
 });
 
 app.listen(port);

@@ -4790,16 +4790,16 @@ process.umask = function() { return 0; };
 
 },{}],3:[function(require,module,exports){
 (function (process){
-var moment = require('moment');
-var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-var idtoken, userLevel;
-var loggedIn = false;
+let moment = require('moment');
+let days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let idtoken, userLevel;
+let loggedIn = false;
 
 // tell eslint that the Google API is a thing
 /* global gapi */
 
 async function updateTable() {
-	var data = await fetch('/bookings');
+	let data = await fetch('/bookings');
 	data = await data.json();
 	
 	process(data);
@@ -4811,8 +4811,8 @@ function process(bookings) {
 	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped table-responsive\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
 
 	// build table with cells for each time slot
-	var today = moment();
-	var i, j;
+	let today = moment();
+	let i, j;
 
 	for (i = 0; i < 21; i++) {
 		$('#timetable-header').append('<th><div class=\'width-normaliser\'>'+days[(i+today.isoWeekday()-1)%7]+'</div>' + moment(today).add(i, 'days').format('DD/MM') + '</th>');
@@ -4826,7 +4826,7 @@ function process(bookings) {
 	}
 
 	// get an ordered list of table headers
-	var headers = $('#timetable-header').find('th');
+	let headers = $('#timetable-header').find('th');
 	// for the three coming Mondays
 	for (i = 8-today.isoWeekday(); i < 21; i += 7) {
 		// add mon-col class to the header
@@ -4840,10 +4840,10 @@ function process(bookings) {
 
 	for (i of Object.keys(bookings)) {
 		// get number of days before the booking
-		var day = moment(bookings[i].date, 'DD/MM/YYYY').startOf('day').diff(today.startOf('day'), 'days');
-		var time = [moment(bookings[i].date + ' ' + bookings[i].STime, 'DD/MM/YYYY HH:mm').hour(), moment(bookings[i].date + ' ' + bookings[i].ETime, 'DD/MM/YYYY HH:mm').hour()];
-		var sessionLength = (time[1]-time[0]);
-		var tableID = '#'+day.toString()+'-';
+		let day = moment(bookings[i].date, 'DD/MM/YYYY').startOf('day').diff(today.startOf('day'), 'days');
+		let time = [moment(bookings[i].date + ' ' + bookings[i].STime, 'DD/MM/YYYY HH:mm').hour(), moment(bookings[i].date + ' ' + bookings[i].ETime, 'DD/MM/YYYY HH:mm').hour()];
+		let sessionLength = (time[1]-time[0]);
+		let tableID = '#'+day.toString()+'-';
 		for (j = 1; j < sessionLength; j++) {
 			// hide cells that overlap with the current booking time
 			$(tableID+(j+time[0]).toString()).hide();
@@ -4868,16 +4868,11 @@ function process(bookings) {
 $('#bookingform').submit(async function(e) {
 	e.preventDefault();
 	if (loggedIn) {
-		/*await $.ajax({
-			url: '/bookings',
-			type: 'POST',
-			data: $('#bookingform').serialize()
-		});*/
 		
-		var formJSON = {};
+		let formJSON = {};
 		$('#bookingform input').each(function() {
-			var elem = $(this);
-			var val;
+			let elem = $(this);
+			let val;
 			if (elem.attr('name') == 'recurrence') {
 				val = elem.prop('checked');
 			}
@@ -4913,7 +4908,7 @@ function hideLoad() {
 	$('#loading-screen').remove();
 }
 async function getUserBookings() {
-	var data = await fetch('/bookings', {headers: {'token': idtoken}});
+	let data = await fetch('/bookings', {headers: {'token': idtoken}});
 	data = await data.json();
 	$('#userTable tr:not(:first)').remove();
 	if (Object.keys(data).length > 0) {
@@ -4929,28 +4924,14 @@ async function getUserBookings() {
 }
 
 function showBookings(bookings) {
-	for (var i of Object.keys(bookings)) {
-		var cur = bookings[i];
+	for (let i of Object.keys(bookings)) {
+		let cur = bookings[i];
 		$('#userTable').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="rem-btn" booking="' + i + '">Remove</td></tr>');
 	}
 	$('.rem-btn').each(function() {
 		this.addEventListener('click', async function() {
-			var elem = this;
+			let elem = this;
 			$(elem).css('background-color', '#ff0000');
-			/* await $.ajax({
-				url: '/remove',
-				type: 'POST',
-				data: {
-					id: $(elem).attr('booking'),
-					user: idtoken
-				},
-				success: function() {
-					$(elem).css('background-color', '#00ff00');
-					updateTable();
-					$('html, body').animate({ scrollTop: 0 }, 'slow');
-					setTimeout(updateAfterRem, 700);
-				}
-			}); */
 
 			try {
 				await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
@@ -4974,7 +4955,7 @@ function updateAfterRem() {
 }
 // define function for sorting bookings by date booking was made (to determine priority)
 // repeated items take priority
-/* var sortByDates = function(row1, row2) {
+/* let sortByDates = function(row1, row2) {
 	if (row1.recurrence) return -1;
 	if (row2.recurrence) return 1;
 	if (row1.booktime > row2.booktime) return 1;
@@ -5002,19 +4983,20 @@ document.addEventListener('DOMContentLoaded', function() {
 	updateTable();
 	gapi.load('auth2', function(){
 		// Retrieve the singleton for the GoogleAuth library and set up the client.
-		var auth2 = gapi.auth2.init({
+		let auth2 = gapi.auth2.init({
 			client_id: '149049213874-0g5d6qbds8th0f1snmhap4n0a05cssp2.apps.googleusercontent.com',
 			cookiepolicy: 'single_host_origin'
 		});
 		auth2.attachClickHandler(document.getElementById('signin-link'), {},
 			async function(googleUser) {
-				var profile = googleUser.getBasicProfile();
+				let profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
 				$('#user-img').attr('src', profile.getImageUrl());
 				$('#user-name').html(profile.getName());
 				loggedIn = true;
-				var perms = await fetch('/perms', {headers: {'token': idtoken}});
-				userLevel = await perms.json();
+				let data = await fetch('/perms', {headers: {'token': idtoken}});
+				data = await data.json();
+				userLevel = data['perms'];
 				getUserBookings(idtoken);
 				$('#user-content').show();
 			}, function(error) {

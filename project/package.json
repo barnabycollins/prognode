@@ -12,6 +12,7 @@
   "author": "Barnaby Collins",
   "license": "ISC",
   "dependencies": {
+    "compression": "^1.7.4",
     "express": "^4.16.4",
     "google-auth-library": "^3.1.2",
     "moment": "^2.24.0"
