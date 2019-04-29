@@ -107,7 +107,7 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 		registerBooking(toAdd, bookId);
 	}
 	catch(error) {
-		throw error;
+		throw 'Your booking clashes with someone else\'s';
 	}
 
 	// if we added the booking successfully, add it to the database

@@ -83,7 +83,7 @@ app.post('/bookings', async function(req, resp) {
 		bs.createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, user, req.body.recurrence);
 	}
 	catch(error) {
-		resp.status(409).send('Error: failed to create your booking: ' + error);
+		resp.status(409).send('Error: failed to create your booking - ' + error);
 		return;
 	}
 	resp.status(201).send(JSON.stringify(bs.getBookings(user), null, 4));

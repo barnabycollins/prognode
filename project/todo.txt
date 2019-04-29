@@ -12,7 +12,7 @@ show current time in UI?
 deal with no connection / disconnections (try/catch around all requests)
 handle errors properly (using HTML elements rather than console / alert())
 add UI for moderating bookings
-rate limiting
+rate limiting?
 use 201, 204
 remove flashing login button code
 make sure content-type is correct when sending stringified JSON

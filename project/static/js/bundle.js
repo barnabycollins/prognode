@@ -4883,14 +4883,22 @@ $('#bookingform').submit(async function(e) {
 			formJSON[elem.attr('name')] = val;
 		});
 
-		await fetch('/bookings', {
-			method: 'post',
-			headers: {
-				'token': idtoken,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(formJSON, null, 4)
-		});
+		try {
+			var response = await fetch('/bookings', {
+				method: 'post',
+				headers: {
+					'token': idtoken,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(formJSON, null, 4)
+			});
+			if (!response.ok) {
+				throw await response.text();
+			}
+		}
+		catch (error) {
+			makeToast('Failed to make booking', error);
+		}
 
 		updateTable();
 		getUserBookings();
