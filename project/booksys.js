@@ -63,9 +63,19 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	let id = user['sub'];
 	let email = user['email'];
 	let userName = user['name'];
-
-	let start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
-	let end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	try {
+		var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	}
+	catch (error) {
+		throw 'Start time or date is not valid: please make sure you are using DD/MM/YYYY and HH:mm';
+	}
+	
+	try {
+		var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm').startOf('hour');
+	}
+	catch (error) {
+		throw 'End time is not valid: please make sure you are using HH:mm';
+	}
 	
 	if (end.isBefore(moment())) {
 		throw 'Booking is in the past';
@@ -87,12 +97,13 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 		throw 'End is before start';
 	}
 
-	// only allow recurrence if they have the permissions for it
-	if (getPerms(id) < 2) {
+	// only allow recurrence if they have the permissions for it (also make sure recurrence is of the right type)
+	if (getPerms(id) < 2 || recurrence !== true) {
 		recurrence = false;
 	}
 
-	// make booking object
+	// booking is correctly formed
+	// make booking object, including the time of booking and a name of appropriate length
 	let toAdd = new Booking(moment().toISOString(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name.substring(0, 32));
 	let bookId = bookingnum;
 	if (bookingpool.length > 0) {
@@ -145,7 +156,7 @@ function registerBooking(booking, id) {
 		}
 		else {
 			try {
-				// remove that booking and try adding the current booking again
+				// remove that booking and then try adding the current booking again
 				removeBooking(bookedTimes[year][day][j], booking.id);
 				registerBooking(booking, id);
 				break;
@@ -176,8 +187,8 @@ function removeBooking(id, user) {
 	}
 
 	let booking = bookings[id];
-	if (user != booking.id && getPerms(user) < 9) {
-		throw 'You don\'t have permission to delete that booking: booking registered to ID ' + booking.id + ' being deleted by user ' + user;
+	if (user != booking.id) {
+		throw 'You can\t delete someone else\'s booking';
 	}
 
 	let bookingtimes = getTimestamps(booking);
@@ -206,8 +217,8 @@ function removeBooking(id, user) {
 
 
 /**
- * Gets all bookings, or the bookings for a user if one is given
- * @param {string} user 
+ * Gets all bookings, or the bookings for a user ID if one is given
+ * @param {string} [user] id of the user to check 
  */
 function getBookings(user) {
 	let i, j, content = {};
