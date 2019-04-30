@@ -1,6 +1,6 @@
 const moment = require('moment');
 const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-let idtoken, userLevel;
+let idtoken, userLevel, userId;
 let loggedIn = false;
 let toastCount = 0;
 
@@ -162,6 +162,7 @@ async function getUserBookings() {
 		makeToast('Failed to get bookings', error);
 		return;
 	}
+
 	$('#userTable tr:not(:first)').remove();
 	
 	// if the user has bookings
@@ -206,6 +207,58 @@ function updateAfterRem() {
 	getUserBookings();
 }
 
+async function populateAdminContent() {
+	try {
+		let response = await fetch('/all', {headers: {'token': idtoken}});
+		if (!response.ok) {
+			makeToast('Failed to get admin data', await response.text());
+			return;
+		}
+		var data = await response.json();
+	}
+	catch (error) {
+		makeToast('Failed to get admin data', error);
+		return;
+	}
+
+	$('#admin-bookings tr:not(:first)').remove();
+	
+	// if the user has bookings
+	if (Object.keys(data.bookings).length > 0) {
+		for (let i of Object.keys(data.bookings)) {
+			let cur = data.bookings[i];
+			if (cur.id !== userId) {
+				$('#admin-bookings').append('<tr><td>' + cur.name + '</td><td>' + cur.date + ', ' + cur.STime + '-' + cur.ETime + '</td><td>' + moment(cur.booktime).format('DD/MM/YYYY HH:mm') +'</td><td class="admin-rem-btn" booking="' + i + '">Remove</td></tr>');
+			}
+		}
+		$('.admin-rem-btn').each(function() {
+			this.addEventListener('click', async function() {
+				let elem = this;
+				$(elem).css('background-color', '#ff0000');
+	
+				try {
+					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+					if (!response.ok) {
+						makeToast('Failed to delete booking', await response.text());
+					}
+				}
+				catch (error) {
+					makeToast('Failed to delete booking', error);
+					return;
+				}
+	
+				$(elem).css('background-color', '#00ff00');
+				updateTable();
+				$('html, body').animate({ scrollTop: 0 }, 'slow');
+				setTimeout(updateAfterRem, 700);
+			});
+		});
+	}
+	else {
+		$('#admin-bookings').append('<tr><td colspan=4>No bookings found</td></tr>');
+	}
+}
+
 // set up custom booking form fields
 $('#datepicker').datepicker({
 	'format': 'dd/mm/yyyy'
@@ -241,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				// get profile information
 				let profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
+				userId = profile.getId();
 
 				// update login button with user details
 				$('#user-img').attr('src', profile.getImageUrl());
@@ -253,15 +307,21 @@ document.addEventListener('DOMContentLoaded', function() {
 				let data = await fetch('/perms', {headers: {'token': idtoken}});
 				data = await data.json();
 				userLevel = data['perms'];
-				if (userLevel >= 2) {
-					$('#recurrence').show();
-				}
 
 				// get the user's bookings for display on the user table
 				getUserBookings();
 
 				// show elements for logged in users
+				if (userLevel >= 2) {
+					$('#recurrence').show();
+					if (userLevel == 9) {
+						populateAdminContent();
+						$('#admin-header').show();
+						$('#admin-content').show();
+					}
+				}
 				$('#user-content').show();
+				
 
 			}, function(error) {
 				makeToast('Signin failed', error['error']);

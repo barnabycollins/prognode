@@ -25,7 +25,8 @@
 			Loading data...
 		</div>
 		<br>
-		<div class="row" id="user-content" style="display: none;">
+		<!---->
+		<div class="row content-row" id="user-content" style="display: none;">
 			<div class="col-lg-5">
 				<div>
 					<h2>Make a booking</h2>
@@ -72,8 +73,35 @@
 				</div>
 			</div>
 		</div>
-		<br>
-		<br>
+
+		<h2 id="admin-header" style="display: none;">ADMIN ZONE</h2>
+		<div class="row content-row" id="admin-content" style="display: none;">
+			<div class="col-lg-4">
+				<div>
+					<h2>User List</h2>
+					<table id="admin-users" class="table table-dark table-striped">
+						<tr>
+							<th>Name</th>
+							<th>Perms</th>
+							<th></th>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="col-lg-8">
+				<div>
+					<h2>Other users' bookings</h2>
+					<table id="admin-bookings" class="table table-dark table-striped">
+						<tr>
+							<th>Name</th>
+							<th>Date</th>
+							<th>Date Made</th>
+							<th></th>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<!--<footer>

@@ -129,6 +129,38 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 
 
 /**
+ * Update user permissions
+ * @param {string} admin 
+ * @param {string} id 
+ * @param {number} perms 
+ */
+function updateUser(admin, id, perms) {
+	if (UserList[admin].permissionLevel < 9) {
+		throw 'You don\'t have permission to change user permissions';
+	}
+	
+	try {
+		var permissionLevel = parseInt(perms);
+	}
+	catch (error) {
+		throw 'Given permission level is not a number';
+	}
+
+	if (perms > 9 || perms < 0) {
+		throw 'Permission level falls outside the range of 0-9';
+	}
+
+	try {
+		UserList[id].permissionLevel = permissionLevel;
+	}
+	catch (error) {
+		throw 'User does not exist';
+	}
+}
+
+
+
+/**
  * Register booking to bookedTimes
  * @param {object} booking booking to add
  * @param {number} id id to give to the booking
@@ -317,7 +349,11 @@ function getPerms(id) {
 /**
  * DEBUG: returns the full state of the booking system
  */
-function getState() {
+function getState(id) {
+	let perms = getPerms(id);
+	if (perms < 9) {
+		throw 'You don\'t have permission to access server state';
+	}
 	return {'bookings': bookings, 'bookedTimes': bookedTimes, 'bookingnum': bookingnum, 'bookingpool': bookingpool, 'UserList': UserList};
 }
 
@@ -353,4 +389,4 @@ if (!ready) {
 	saveToDisk();
 }
 
-module.exports = {createBooking, removeBooking, getBookings, getState, getPerms, ready};
+module.exports = {createBooking, removeBooking, getBookings, getState, getPerms, ready, updateUser};

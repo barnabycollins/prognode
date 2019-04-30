@@ -53,22 +53,28 @@ app.get('/bookings', async function(req, resp) {
 			return;
 		}
 	}
-	resp.send(JSON.stringify(bs.getBookings(user), null, 4));
+	resp.type('json').send(JSON.stringify(bs.getBookings(user), null, 4));
 });
 
 /* ADD OR UPDATE USER ENTRY */
-/* app.post('/updateuser', async function(req, resp) {
+app.post('/users', async function(req, resp) {
 	try {
-		let user = await verify(req.body.id);
+		var user = await verify(req.header('token'));
 	}
 	catch (error) {
 		resp.status(401).send('Error: Failed to verify your Google account');
 		return;
 	}
 
-	bs.updateUser(user['sub'], req.body.name);
+	try {
+		bs.updateUser(user['sub'], req.body.id, req.body.perms);
+	}
+	catch (error) {
+		resp.status(400).send('Error: Could not update user - ' + error);
+		return;
+	}
 	resp.send('User successfully updated');
-}); */
+});
 
 /* NEW BOOKING */
 app.post('/bookings', async function(req, resp) {
@@ -86,7 +92,7 @@ app.post('/bookings', async function(req, resp) {
 		resp.status(409).send('Error: failed to create your booking - ' + error);
 		return;
 	}
-	resp.status(201).send(JSON.stringify(bs.getBookings(user), null, 4));
+	resp.status(201).type('json').send(JSON.stringify(bs.getBookings(user), null, 4));
 });
 
 /* REMOVE BOOKING */
@@ -106,7 +112,7 @@ app.delete('/bookings', async function(req, resp) {
 		resp.status(401).send('Error: ' + error);
 		return;
 	}
-	resp.send('Successfully removed booking ' + req.header('id'));
+	resp.status(204).send('Successfully removed booking ' + req.header('id'));
 });
 
 /* GET PERMS FOR A USER ACCOUNT */
@@ -119,12 +125,26 @@ app.get('/perms', async function(req, resp) {
 		resp.status(401).send('Error: failed to verify your Google account');
 		return;
 	}
-	resp.send(JSON.stringify({'perms': bs.getPerms(id)}, null, 4));
+	resp.type('json').send(JSON.stringify({'perms': bs.getPerms(id)}, null, 4));
 });
 
 /* DEBUG: GET FULL STATE */
-app.get('/all', function(req, resp) {
-	resp.send(bs.getState());
+app.get('/all', async function(req, resp) {
+	try {
+		var user = await verify(req.header('token'));
+	}
+	catch (error) {
+		resp.status(401).send('Error: failed to verify your Google account');
+		return;
+	}
+	try {
+		var struct = bs.getState(user['sub']);
+	}
+	catch (error) {
+		resp.status(401).send('Error: ' + error);
+		return;
+	}
+	resp.type('json').send(JSON.stringify(struct, null, 4));
 });
 
 /* OTHERWISE */

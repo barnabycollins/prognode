@@ -91,14 +91,14 @@ footer {
 	line-height: 18px;
 	vertical-align: middle;
 }
-td.rem-btn {
+td.rem-btn, td.admin-rem-btn {
 	transition: background-color 0.5s ease;
 	text-align: center;
 	vertical-align: middle;
 	width: 80px;
 	cursor: pointer;
 }
-.rem-btn:hover {
+.rem-btn:hover, .admin-rem-btn:hover {
 	background-color: #ff0000;
 }
 .rembook {
@@ -114,7 +114,10 @@ div#timetable-container ::-webkit-scrollbar-track {
 div#timetable-container ::-webkit-scrollbar-thumb {
 	background-color: #444;
 }
-#user-content div div {
+.content-row {
+	margin-bottom: 30px;
+}
+.content-row div div {
 	background-color: #2a2a2a;
 	border-radius: 5px;
 	padding: 10px;
