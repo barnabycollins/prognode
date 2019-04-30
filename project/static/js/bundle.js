@@ -4816,6 +4816,9 @@ function updateAfterRem() {
 	getUserBookings();
 }
 
+/**
+ * Get and populate data for the admin panels
+ */
 async function populateAdminContent() {
 	try {
 		let response = await fetch('/all', {headers: {'token': idtoken}});
@@ -4841,8 +4844,8 @@ async function populateAdminContent() {
 		}
 		$('.admin-rem-btn').each(function() {
 			this.addEventListener('click', async function() {
-				let elem = this;
-				$(elem).css('background-color', '#ff0000');
+				let elem = $(this);
+				elem.css('background-color', '#ff0000');
 	
 				try {
 					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
@@ -4855,10 +4858,7 @@ async function populateAdminContent() {
 					return;
 				}
 	
-				$(elem).css('background-color', '#00ff00');
-				updateTable();
-				$('html, body').animate({ scrollTop: 0 }, 'slow');
-				setTimeout(updateAfterRem, 700);
+				elem.parent().remove();
 			});
 		});
 	}
@@ -4955,6 +4955,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				// show elements for logged in users
 				if (userLevel >= 2) {
 					$('#recurrence').show();
+					$('#bookname').show();
 					if (userLevel == 9) {
 						populateAdminContent();
 						$('#admin-header').show();

@@ -1,6 +1,6 @@
 const moment = require('moment');
 const fs = require('fs');
-let datafile = 'data.json';
+const datafile = 'data.json';
 let writing = false;
 
 
@@ -55,14 +55,16 @@ class Booking {
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(date, STime, ETime, name, user, recurrence) {
-
-	// pull name from user object if necessary
-	if (!name) {
-		name = user['name'];
-	}
 	let id = user['sub'];
 	let email = user['email'];
 	let userName = user['name'];
+	let userPerms = getPerms(id);
+
+	// pull name from user object if necessary
+	if (!name || userPerms < 2) {
+		name = userName;
+	}
+
 	try {
 		var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
 	}
@@ -98,11 +100,35 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	}
 
 	// only allow recurrence if they have the permissions for it (also make sure recurrence is of the right type)
-	if (getPerms(id) < 2 || recurrence !== true) {
+	if (userPerms < 2 || recurrence !== true) {
 		recurrence = false;
 	}
 
 	// booking is correctly formed
+
+	let timeAllowed = -1;
+
+	if (userPerms == 0) {
+		timeAllowed = 4;
+	}
+	else if (userPerms == 1) {
+		timeAllowed = 8;
+	}
+
+	if (timeAllowed >= 0) {
+		let weekSum = end.hour()-start.hour();
+		let weekStart = start.clone().startOf('week').toISOString();
+		for (let i of Object.keys(bookings)) {
+			let cur = bookings[i];
+			if (cur.id == id && moment(cur.date, 'DD/MM/YYYY').startOf('week').toISOString() == weekStart) {
+				weekSum += parseInt(cur.ETime.substring(0,2)) - parseInt(cur.STime.substring(0,2));
+			}
+		}
+		if (weekSum > timeAllowed) {
+			throw 'You have used up your allotted weekly time (' + weekSum.toString() + ' hours out of ' + timeAllowed.toString() + '). Please contact an admin to get your allowance increased!';
+		}
+	}
+
 	// make booking object, including the time of booking and a name of appropriate length
 	let toAdd = new Booking(moment().toISOString(), start.format('DD/MM/YYYY'), start.format('HH:mm'), end.format('HH:mm'), id, recurrence, name.substring(0, 32));
 	let bookId = bookingnum;
@@ -219,8 +245,8 @@ function removeBooking(id, user) {
 	}
 
 	let booking = bookings[id];
-	if (user != booking.id) {
-		throw 'You can\t delete someone else\'s booking';
+	if (user != booking.id && getPerms(user) < 9) {
+		throw 'You can\'t delete someone else\'s booking';
 	}
 
 	let bookingtimes = getTimestamps(booking);
