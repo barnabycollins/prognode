@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
 				
 
 			}, function(error) {
-				makeToast('Signin failed', error['error']);
+				makeToast('Signin failed', 'Make sure you\'ve got popups enabled! (' + error.error + ')');
 			}
 		);
 	});

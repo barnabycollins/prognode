@@ -14,3 +14,4 @@ sort out console warnings on client side
 sign out?
 show current time in UI?
 rate limiting?
+throw new Error() vs throw ''
