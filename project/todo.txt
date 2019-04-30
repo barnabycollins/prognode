@@ -1,18 +1,16 @@
 batch job: remove old bookings, check bookedTimes every 24 hours (archiving?)
 make page properly mobile-responsive
-permissions
+FINISH permissions
     0: 3 hours of bookings per week, no recurrences, only able to modify own bookings
     1: 5 hours of bookings per week
     2: recurrences allowed
     3: 5 hours of bookings per week, and recurrences allowed
     4: unlimited bookings
     9: deleting others' bookings (max permissions, admin level)
-handle blocked Google popup
+check blocked Google popup
+test no connection / disconnections
+check 201, 204
+sort out console warnings on client side
+sign out?
 show current time in UI?
-deal with no connection / disconnections (try/catch around all requests)
-handle errors properly (using HTML elements rather than console / alert())
-add UI for moderating bookings
 rate limiting?
-use 201, 204
-sign out
-clean up request error handling (switch to throw and have makeToast in catch)

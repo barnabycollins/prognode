@@ -143,3 +143,6 @@ div#timetable-container ::-webkit-scrollbar-thumb {
 .toast {
 	color: rgb(33, 37, 41);
 }
+.user-perms-inp {
+	width: 50px;
+}

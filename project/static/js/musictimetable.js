@@ -131,9 +131,14 @@ $('#bookingform').submit(async function(e) {
  * Make a toast notification (usually for an error)
  * @param {string} title title for the toast notification
  * @param {string} message message for the toast notification
+ * @param {boolean} [autohide] whether or not to hide the toast
  */
-function makeToast(title, message) {
-	let toastStr = '<div id="toast-' + toastCount.toString() + '" class="toast" data-autohide="false"><div class="toast-header"><strong class="mr-auto">' + title + '</strong><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="toast-body">' + message + '</div></div>';
+function makeToast(title, message, autohide) {
+	let hidestr = 'false';
+	if (autohide) {
+		hidestr = 'true';
+	}
+	let toastStr = '<div id="toast-' + toastCount.toString() + '" class="toast" data-autohide="' + hidestr + '" data-delay="3000"><div class="toast-header"><strong class="mr-auto">' + title + '</strong><button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="toast-body">' + message + '</div></div>';
 	$('#toast-container').append(toastStr);
 	$('#toast-' + toastCount.toString()).toast('show');
 	toastCount++;
@@ -153,8 +158,7 @@ async function getUserBookings() {
 	try {
 		let response = await fetch('/bookings', {headers: {'token': idtoken}});
 		if (!response.ok) {
-			makeToast('Failed to get bookings', await response.text());
-			return;
+			throw await response.text();
 		}
 		var data = await response.json();
 	}
@@ -179,7 +183,7 @@ async function getUserBookings() {
 				try {
 					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
 					if (!response.ok) {
-						makeToast('Failed to delete booking', await response.text());
+						throw await response.text();
 					}
 				}
 				catch (error) {
@@ -211,8 +215,7 @@ async function populateAdminContent() {
 	try {
 		let response = await fetch('/all', {headers: {'token': idtoken}});
 		if (!response.ok) {
-			makeToast('Failed to get admin data', await response.text());
-			return;
+			throw await response.text();
 		}
 		var data = await response.json();
 	}
@@ -239,7 +242,7 @@ async function populateAdminContent() {
 				try {
 					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
 					if (!response.ok) {
-						makeToast('Failed to delete booking', await response.text());
+						throw await response.text();
 					}
 				}
 				catch (error) {
@@ -256,6 +259,39 @@ async function populateAdminContent() {
 	}
 	else {
 		$('#admin-bookings').append('<tr><td colspan=4>No bookings found</td></tr>');
+	}
+
+
+	$('#admin-users tr:not(:first)').remove();
+
+	for (let i of Object.keys(data.UserList)) {
+		let cur = data.UserList[i];
+		$('#admin-users').append('<tr><td>' + cur.name + '</td><td><form id="form-' + i + '"><input class="user-perms-inp" type=number min="0" max="9" value="' + cur.permissionLevel + '"></form></td><td><input form="form-' + i + '" type="submit" value="Update"></td></tr>');
+
+		$('#form-' + i).submit(async function(e) {
+			let elem = $(this);
+			let level = elem.children('input.user-perms-inp').first().val();
+			e.preventDefault();
+
+			try {
+				let response = await fetch('/users', {
+					method: 'post',
+					headers: {
+						'token': idtoken,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({'id': i, 'perms': level}, null, 4)
+				});
+				if (!response.ok) {
+					throw await response.text();
+				}
+			}
+			catch (error) {
+				makeToast('Failed to change user permissions', error);
+				return;
+			}
+			makeToast('User updated successfully', 'User ' + cur.name + ' given permission level ' + level, true);
+		});
 	}
 }
 
