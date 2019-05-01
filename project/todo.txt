@@ -3,14 +3,8 @@ make page properly mobile-responsive
 permissions ARE DONE
     0: 4 hours of bookings per week, no recurrences, only able to modify own bookings
     1: 8 hours of bookings per week
-    2: 8 hours of bookings per week, and recurrences allowed, custom names [IMPLEMENT CLIENTSIDE]
+    2: 8 hours of bookings per week, and recurrences allowed, custom names
     3: unlimited bookings
     9: deleting others' bookings (max permissions, admin level)
-check blocked Google popup
-test no connection / disconnections on all requests
-check 201, 204
-sort out console warnings on client side
-sign out?
-show current time in UI?
-rate limiting?
 style submit buttons
+IMPLEMENT RECURRING STUFF IN THE UI

@@ -146,3 +146,39 @@ div#timetable-container ::-webkit-scrollbar-thumb {
 .user-perms-inp {
 	width: 50px;
 }
+
+
+@media (max-width: 1199.98px) {
+	.content-row div {
+		margin-bottom: 30px;
+	}
+	#toast-container {
+		width: 250px;
+	}
+}
+
+
+@media (max-width: 767.98px) {
+	body {
+		font-size: 12px;
+	}
+	.width-normaliser {
+		width: 70px;
+	}
+	h1 {
+		font-size: 30px;
+	}
+	h2 {
+		font-size: 24px;
+	}
+}
+
+
+@media (max-width: 575.98px) {
+	.longdate {
+		display: none;
+	}
+	.width-normaliser {
+		width: 35px;
+	}
+}

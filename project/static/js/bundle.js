@@ -4604,7 +4604,7 @@
 
 },{}],2:[function(require,module,exports){
 const moment = require('moment');
-const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const days = ['Mon<span class="longdate">day</span>','Tues<span class="longdate">day</span>','Wed<span class="longdate">nesday</span>','Thurs<span class="longdate">day</span>','Fri<span class="longdate">day</span>','Sat<span class="longdate">urday</span>','Sun<span class="longdate">day</span>'];
 let idtoken, userLevel, userId;
 let loggedIn = false;
 let toastCount = 0;
