@@ -57,7 +57,7 @@ app.get('/bookings', async function(req, resp) {
 });
 
 /* ADD OR UPDATE USER ENTRY */
-app.post('/users', async function(req, resp) {
+app.post('/perms', async function(req, resp) {
 	try {
 		var user = await verify(req.header('token'));
 	}

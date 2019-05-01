@@ -161,6 +161,11 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
  * @param {number} perms 
  */
 function updateUser(admin, id, perms) {
+	let permittedLevels = ['0', '1', '2', '3', '9'];
+	if (!(perms in permittedLevels)) {
+		throw 'Invalid permission level';
+	}
+
 	if (UserList[admin].permissionLevel < 9) {
 		throw 'You don\'t have permission to change user permissions';
 	}

@@ -4879,7 +4879,7 @@ async function populateAdminContent() {
 			e.preventDefault();
 
 			try {
-				let response = await fetch('/users', {
+				let response = await fetch('/perms', {
 					method: 'post',
 					headers: {
 						'token': idtoken,

@@ -146,6 +146,10 @@ div#timetable-container ::-webkit-scrollbar-thumb {
 .user-perms-inp {
 	width: 50px;
 }
+#admin-header {
+	text-align: center;
+	margin-bottom: 30px;
+}
 
 
 @media (max-width: 1199.98px) {
