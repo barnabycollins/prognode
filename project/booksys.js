@@ -471,11 +471,11 @@ if (!ready) {
 	UserList = {		// object to store registered users
 		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com')
 	};
-	bookedTimes = {'reg': {}, 'rec': {}};	// object to store what times are booked so we can check for clashes
+	bookedTimes = {'reg': {}, 'rec': {}};	// object to store what times are booked so we can check for clashes (reg = regular, rec = recurring)
 	bookings = {};		// object to store bookings in
 	bookingnum = 1;		// counter to store the current booking index
 	bookingpool = [];	// queue to store the pool of free booking numbers
-	ready = true;
+	ready = true;		// boolean to tell the server when the database is set up
 	saveToDisk();
 }
 
