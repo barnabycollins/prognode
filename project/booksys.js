@@ -1,7 +1,7 @@
 const moment = require('moment');
 const fs = require('fs');
 const datafile = 'data.json';
-let writing = false;
+let writing = false, ready = false;
 
 
 
@@ -24,7 +24,7 @@ class User {
 class Booking {
 	/**
 	* Class for a booking
-	* @param {string} booktime unix timestamp for the time the booking was made (used for priority)
+	* @param {string} booktime ISO 8601 timestamp for the time the booking was made
 	* @param {string} date date of booking
 	* @param {string} STime start time of the booking
 	* @param {string} ETime end time of the booking
@@ -47,11 +47,11 @@ class Booking {
 
 /**
 * Create new booking
-* @param {object} date
-* @param {object} STime JS Date.toString() object representing the start time of the booking
-* @param {object} ETime JS Date.toString() object representing the end time of the booking
+* @param {string} date DD/MM/YYYY date string for the booking date
+* @param {string} STime HH:mm string for the start time of the booking
+* @param {string} ETime HH:mm string for the end time of the booking
 * @param {string} name the name to display on that booking
-* @param {string} user the user object of the Google account that made the booking
+* @param {object} user the user object of the Google account that made the booking
 * @param {boolean} recurrence whether or not the booking will recur every week
 */
 function createBooking(date, STime, ETime, name, user, recurrence) {
@@ -144,7 +144,7 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 		registerBooking(toAdd, bookId);
 	}
 	catch(error) {
-		throw 'Your booking clashes with someone else\'s';
+		throw 'Your booking clashes with someone else\'s. (' + error + ')';
 	}
 
 	// if we added the booking successfully, add it to the database
@@ -198,40 +198,86 @@ function updateUser(admin, id, perms) {
  */
 function registerBooking(booking, id) {
 	let bookingtimes = getTimestamps(booking);
-	let year = bookingtimes[0].year();
-	let day = bookingtimes[0].dayOfYear();
-	
-	// if we haven't yet got an entry for the year, add one for the year and day
-	if (bookedTimes[year] == undefined) {
-		bookedTimes[year] = {};
-		bookedTimes[year][day] = {};
-	}
-	// if we haven't yet got an entry for the day, add one for it
-	else if (bookedTimes[year][day] == undefined) {
-		bookedTimes[year][day] = {};
-	}
-	
-	// for each hour of the booking
-	for (let j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
-		if (bookedTimes[year][day][j] === undefined) {
-			// if we don't yet have anything else booked then, remember it's booked now
-			bookedTimes[year][day][j] = id;
+	let dayOfWeek = bookingtimes[0].isoWeekday();
+	if (booking.recurrence) {
+		if (bookedTimes.rec[dayOfWeek] == undefined) {
+			bookedTimes.rec[dayOfWeek] = {};
 		}
-		else {
-			try {
-				// remove that booking and then try adding the current booking again
-				removeBooking(bookedTimes[year][day][j], booking.id);
-				registerBooking(booking, id);
-				break;
-			}
-			catch (error) {
-				// if we fail to remove the clashing booking(s)
-				for (let k = bookingtimes[0].hour(); k < j; k++) {
-					// remove past entries in bookedTimes and put the id back in the bookingpool
-					delete bookedTimes[year][day][j];
+
+		for (let j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
+			let clashingBooking = bookedTimes.rec[dayOfWeek][j];
+			
+			for (let a of Object.keys(bookedTimes.reg)) {		// years
+				for (let b of Object.keys(bookedTimes.reg[a]))	{	// days
+					clashingBooking = clashingBooking || bookedTimes.reg[a][b][j];
 				}
-				bookingpool.push(id);
-				throw error;
+			}
+			if (clashingBooking === undefined) {
+				bookedTimes.rec[dayOfWeek][j] = id;
+			}
+			else {
+				try {
+					removeBooking(clashingBooking, booking.id);
+					registerBooking(booking, id);
+					break;
+				}
+				catch (error) {
+					for (let k = bookingtimes[0].hour(); k < j; k++) {
+						delete bookedTimes.rec[dayOfWeek][k];
+					}
+					bookingpool.push(id);
+					throw error;
+				}
+			}
+		}
+	}
+	else {
+		let year = bookingtimes[0].year();
+		let day = bookingtimes[0].dayOfYear();
+		
+		// if we haven't yet got an entry for the year, add one for the year and day
+		if (bookedTimes.reg[year] == undefined) {
+			bookedTimes.reg[year] = {};
+			bookedTimes.reg[year][day] = {};
+		}
+		// if we haven't yet got an entry for the day, add one for it
+		else if (bookedTimes.reg[year][day] == undefined) {
+			bookedTimes.reg[year][day] = {};
+		}
+		
+		// for each hour of the booking
+		for (let j = bookingtimes[0].hour(); j < bookingtimes[1].hour(); j++) {
+
+			let clashingBooking;
+			if (bookedTimes.rec[dayOfWeek]) {
+				clashingBooking = bookedTimes.rec[dayOfWeek][j];
+			}
+			else {
+				clashingBooking = bookedTimes.reg[year][day][j];
+			}
+			if (clashingBooking === undefined) {
+				// if we don't yet have anything else booked then, remember it's booked now
+				bookedTimes.reg[year][day][j] = id;
+			}
+			else {
+				try {
+					if (bookings[clashingBooking].recurrence) {
+						throw 'Please delete recurring bookings before trying to overwrite them';
+					}
+					// remove that booking and then try adding the current booking again
+					removeBooking(clashingBooking, booking.id);
+					registerBooking(booking, id);
+					break;
+				}
+				catch (error) {
+					// if we fail to remove the clashing booking(s)
+					for (let k = bookingtimes[0].hour(); k < j; k++) {
+						// remove past entries in bookedTimes and put the id back in the bookingpool
+						delete bookedTimes.reg[year][day][k];
+					}
+					bookingpool.push(id);
+					throw error;
+				}
 			}
 		}
 	}
@@ -255,19 +301,32 @@ function removeBooking(id, user) {
 	}
 
 	let bookingtimes = getTimestamps(booking);
-	let year = bookingtimes[0].year();
-	let day = bookingtimes[0].dayOfYear();
+	if (booking.recurrence) {
+		let dayOfWeek = bookingtimes[0].isoWeekday();
+	
+		for (let i = bookingtimes[0].hour(); i < bookingtimes[1].hour(); i++) {
+			delete bookedTimes.rec[dayOfWeek][i];
+		}
 
-	for (let i = bookingtimes[0].hour(); i < bookingtimes[1].hour(); i++) {
-		delete bookedTimes[year][day][i];
+		if (Object.keys(bookedTimes.rec[dayOfWeek]).length == 0) {
+			delete bookedTimes.rec[dayOfWeek];
+		}
 	}
-
-	// tidy up any empty entries in bookedTimes
-	if (Object.keys(bookedTimes[year][day]).length == 0) {
-		delete bookedTimes[year][day];
-
-		if (Object.keys(bookedTimes[year]).length == 0) {
-			delete bookedTimes[year];
+	else {
+		let year = bookingtimes[0].year();
+		let day = bookingtimes[0].dayOfYear();
+	
+		for (let i = bookingtimes[0].hour(); i < bookingtimes[1].hour(); i++) {
+			delete bookedTimes.reg[year][day][i];
+		}
+	
+		// tidy up any empty entries in bookedTimes
+		if (Object.keys(bookedTimes.reg[year][day]).length == 0) {
+			delete bookedTimes.reg[year][day];
+	
+			if (Object.keys(bookedTimes.reg[year]).length == 0) {
+				delete bookedTimes.reg[year];
+			}
 		}
 	}
 
@@ -352,7 +411,7 @@ function saveToDisk() {
 
 
 /**
- * Converts booking objects to Unix timestamps
+ * Converts booking objects to Moment objects
  * @param {Object} booking booking to convert to a timestamp
  */
 function getTimestamps(booking) {
@@ -390,7 +449,7 @@ function getState(id) {
 
 
 
-let ready = false, bookings, UserList, bookedTimes, bookingnum, bookingpool;
+let bookings, UserList, bookedTimes, bookingnum, bookingpool;
 try {
 	if (fs.existsSync(datafile)) {
 		let struct = JSON.parse(fs.readFileSync(datafile));
@@ -412,7 +471,7 @@ if (!ready) {
 	UserList = {		// object to store registered users
 		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com')
 	};
-	bookedTimes = {};	// object to store what times are booked so we can check for clashes
+	bookedTimes = {'reg': {}, 'rec': {}};	// object to store what times are booked so we can check for clashes
 	bookings = {};		// object to store bookings in
 	bookingnum = 1;		// counter to store the current booking index
 	bookingpool = [];	// queue to store the pool of free booking numbers

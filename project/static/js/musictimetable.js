@@ -22,7 +22,7 @@ async function updateTable() {
 		makeToast('Failed to get bookings', error);
 	}
 
-	/* PROCESS RECEIVED BOOKINGS */
+	/* GENERATE TABLE */
 	// add table inside #timetable-container with header row and initial box
 	$('#timetable-container').html('<table id=\'timetable\' class=\'table table-dark table-striped table-responsive\'><tr id=\'timetable-header\'><td class=\'time-header\'></td></tr></table>');
 
@@ -54,32 +54,50 @@ async function updateTable() {
 		}
 	}
 
+	/* PROCESS RECEIVED BOOKINGS */
+
 	for (i of Object.keys(bookings)) {
-		// get number of days before the booking
-		let day = moment(bookings[i].date, 'DD/MM/YYYY').startOf('day').diff(today.startOf('day'), 'days');
-		let time = [moment(bookings[i].date + ' ' + bookings[i].STime, 'DD/MM/YYYY HH:mm').hour(), moment(bookings[i].date + ' ' + bookings[i].ETime, 'DD/MM/YYYY HH:mm').hour()];
-		let sessionLength = (time[1]-time[0]);
-		let tableID = '#'+day.toString()+'-';
-		for (j = 1; j < sessionLength; j++) {
-			// hide cells that overlap with the current booking time
-			$(tableID+(j+time[0]).toString()).hide();
-		}
-		tableID = tableID+time[0].toString();
-		$(tableID).show();
-		// extend cell marking start of booking to fill empty space left by other cells
-		$(tableID).attr('rowspan', sessionLength.toString());
-		// change background and fill cell with booker
-		if (bookings[i].recurrence) {
-			$(tableID).css('background-color', '#444444');
+		let cur = bookings[i];
+		cur.date = moment(cur.date, 'DD/MM/YYYY');
+		if (cur.recurrence) {
+			let index = cur.date.startOf('day').diff(today.startOf('day'), 'days');
+			for (j = index; j < 21; j += 7) {
+				let newbooking = Object.assign(cur);
+				newbooking.date = moment().dayOfYear(today.dayOfYear()+j).startOf('day');
+				displayBooking(newbooking, today);
+			}
 		}
 		else {
-			$(tableID).css('background-color', '#005500');
+			displayBooking(cur, today);
 		}
-		$(tableID).html(bookings[i].name);
 	}
 	$('#loading-screen').css('opacity', '0');
-	setTimeout(hideLoad, 1000);
+	setTimeout(hideLoad, 1000);			// hide loading screen
 	setTimeout(updateTable, 600000);	// update again in 10 minutes
+}
+
+function displayBooking(booking, today) {
+	// get number of days before the booking
+	let relativeDay = booking.date.startOf('day').diff(today.startOf('day'), 'days');
+	let time = [moment(booking.STime, 'HH:mm').hour(), moment(booking.ETime, 'HH:mm').hour()];
+	let sessionLength = (time[1]-time[0]);
+	let tableID = '#'+relativeDay.toString()+'-';
+	for (let j = 1; j < sessionLength; j++) {
+		// hide cells that overlap with the current booking time
+		$(tableID+(j+time[0]).toString()).hide();
+	}
+	tableID = tableID+time[0].toString();
+	$(tableID).show();
+	// extend cell marking start of booking to fill empty space left by other cells
+	$(tableID).attr('rowspan', sessionLength.toString());
+	// change background and fill cell with booker
+	if (booking.recurrence) {
+		$(tableID).css('background-color', '#444444');
+	}
+	else {
+		$(tableID).css('background-color', '#005500');
+	}
+	$(tableID).html(booking.name);
 }
 
 /**
