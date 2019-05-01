@@ -26,15 +26,6 @@ app.use(express.static('static'));
 app.use(express.json());
 app.use(compression());
 
-// redirect to HTTPS if request received on HTTP (Jeremias Binder, https://stackoverflow.com/questions/7450940/automatic-https-connection-redirect-with-node-js-express)
-app.use (function (req, res, next) {
-	if (req.secure || req.headers.host.includes('localhost')) {
-		next();
-	} else {
-		res.redirect('https://' + req.headers.host + req.url);
-	}
-});
-
 /* GETTING BOOKINGS */
 app.get('/bookings', async function(req, resp) {
 	let user;
@@ -50,6 +41,58 @@ app.get('/bookings', async function(req, resp) {
 		}
 	}
 	resp.type('json').send(JSON.stringify(bs.getBookings(user), null, 4));
+});
+
+/* NEW BOOKING */
+app.post('/bookings', async function(req, resp) {
+	try {
+		var user = await verify(req.header('token'));
+	}
+	catch (error) {
+		resp.status(401).send('Error: Failed to verify your Google account');
+		return;
+	}
+	try {
+		bs.createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, user, req.body.recurrence);
+	}
+	catch(error) {
+		resp.status(409).send('Error: failed to create your booking - ' + error);
+		return;
+	}
+	resp.status(201).type('json').send(JSON.stringify(bs.getBookings(user['sub']), null, 4));
+});
+
+/* REMOVE BOOKING */
+app.delete('/bookings', async function(req, resp) {
+	try {
+		let user = await verify(req.header('token'));
+		var id = user['sub'];
+	}
+	catch (error) {
+		resp.status(401).send('Error: failed to verify your Google account');
+		return;
+	}
+	try {
+		bs.removeBooking(req.body.id, id);
+	}
+	catch (error) {
+		resp.status(401).send('Error: ' + error);
+		return;
+	}
+	resp.status(204).send('Successfully removed booking ' + req.header('id'));
+});
+
+/* GET PERMS FOR A USER ACCOUNT */
+app.get('/perms', async function(req, resp) {
+	try {
+		let user = await verify(req.header('token'));
+		var id = user['sub'];
+	}
+	catch (error) {
+		resp.status(401).send('Error: failed to verify your Google account');
+		return;
+	}
+	resp.type('json').send(JSON.stringify({'perms': bs.getPerms(id)}, null, 4));
 });
 
 /* ADD OR UPDATE USER ENTRY */
@@ -72,59 +115,7 @@ app.post('/perms', async function(req, resp) {
 	resp.send('User successfully updated');
 });
 
-/* NEW BOOKING */
-app.post('/bookings', async function(req, resp) {
-	try {
-		var user = await verify(req.header('token'));
-	}
-	catch (error) {
-		resp.status(401).send('Error: Failed to verify your Google account');
-		return;
-	}
-	try {
-		bs.createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, user, req.body.recurrence);
-	}
-	catch(error) {
-		resp.status(409).send('Error: failed to create your booking - ' + error);
-		return;
-	}
-	resp.status(201).type('json').send(JSON.stringify(bs.getBookings(user), null, 4));
-});
-
-/* REMOVE BOOKING */
-app.delete('/bookings', async function(req, resp) {
-	try {
-		let user = await verify(req.header('token'));
-		var id = user['sub'];
-	}
-	catch (error) {
-		resp.status(401).send('Error: failed to verify your Google account');
-		return;
-	}
-	try {
-		bs.removeBooking(req.header('id'), id);
-	}
-	catch (error) {
-		resp.status(401).send('Error: ' + error);
-		return;
-	}
-	resp.status(204).send('Successfully removed booking ' + req.header('id'));
-});
-
-/* GET PERMS FOR A USER ACCOUNT */
-app.get('/perms', async function(req, resp) {
-	try {
-		let user = await verify(req.header('token'));
-		var id = user['sub'];
-	}
-	catch (error) {
-		resp.status(401).send('Error: failed to verify your Google account');
-		return;
-	}
-	resp.type('json').send(JSON.stringify({'perms': bs.getPerms(id)}, null, 4));
-});
-
-/* DEBUG: GET FULL STATE */
+/* ADMIN: GET FULL STATE */
 app.get('/all', async function(req, resp) {
 	try {
 		var user = await verify(req.header('token'));

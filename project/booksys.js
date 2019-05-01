@@ -250,7 +250,7 @@ function registerBooking(booking, id) {
 
 			let clashingBooking;
 			if (bookedTimes.rec[dayOfWeek]) {
-				clashingBooking = bookedTimes.rec[dayOfWeek][j];
+				clashingBooking = bookedTimes.rec[dayOfWeek][j] || bookedTimes.reg[year][day][j];
 			}
 			else {
 				clashingBooking = bookedTimes.reg[year][day][j];
@@ -329,7 +329,7 @@ function removeBooking(id, user) {
 			}
 		}
 	}
-
+	
 	// remove booking from bookings database and release the id back to the pool
 	delete bookings[id];
 	bookingpool.push(id);

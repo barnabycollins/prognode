@@ -124,8 +124,8 @@ $('#bookingform').submit(async function(e) {
 			var response = await fetch('/bookings', {
 				method: 'post',
 				headers: {
-					'token': idtoken,
-					'Content-Type': 'application/json'
+					'Content-Type': 'application/json',
+					'token': idtoken
 				},
 				body: JSON.stringify(formJSON, null, 4)
 			});
@@ -199,7 +199,16 @@ async function getUserBookings() {
 				$(elem).css('background-color', '#ff0000');
 	
 				try {
-					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+					let response = await fetch('/bookings', {
+						method: 'delete',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': idtoken
+						},
+						body: JSON.stringify({
+							'id': $(elem).attr('booking')
+						}, null, 4)
+					});
 					if (!response.ok) {
 						throw await response.text();
 					}
@@ -259,9 +268,18 @@ async function populateAdminContent() {
 			this.addEventListener('click', async function() {
 				let elem = $(this);
 				elem.css('background-color', '#ff0000');
-	
+				
 				try {
-					let response = await fetch('/bookings', {method: 'delete', headers: {'token': idtoken, 'id': $(elem).attr('booking')}});
+					let response = await fetch('/bookings', {
+						method: 'delete',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': idtoken
+						},
+						body: JSON.stringify({
+							'id': $(elem).attr('booking')
+						}, null, 4)
+					});
 					if (!response.ok) {
 						throw await response.text();
 					}
