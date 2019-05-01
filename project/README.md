@@ -6,7 +6,7 @@ Currently, my college uses a physical notebook for bookings in the music room. I
 - `server.js`: The code that launches the Express app defined by `app.js`.
   - `app.js`: The Express app defining API endpoints. Requires `booksys.js` and `verify.js`.
     - `booksys.js`: The system for managing bookings.
-    - `verify.js`: The definition of Google's signin API, used to authenticate users making requests.
+    - `verify.js`: Google's signin API, used to authenticate users making requests.
 - `package.json`: The NPM information for this project.
 - `package-lock.json`: The required modules for the project.
 - `README.md`: This readme.
@@ -45,7 +45,7 @@ Returns a list of bookings
 
 ##### Sample call
 ```js
-var response = await fetch('/bookings', {
+let response = await fetch('/bookings', {
     headers: {
         'token': idtoken
     }
@@ -93,7 +93,7 @@ Makes a new booking, returns a list of the user's bookings
 
 ##### Sample call
 ```js
-var response = await fetch('/bookings', {
+let response = await fetch('/bookings', {
     method: 'post',
     headers: {
         'Content-Type': 'application/json',

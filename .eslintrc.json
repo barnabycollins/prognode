@@ -4,7 +4,8 @@
         "commonjs": true,
         "es6": true,
         "node": true,
-        "jquery": true
+        "jquery": true,
+        "jest/globals": true
     },
     "extends": "eslint:recommended",
     "globals": {
@@ -33,6 +34,7 @@
         ]
     },
     "plugins": [
-        "jquery"
+        "jquery",
+        "jest"
     ]
 }

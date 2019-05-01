@@ -1,7 +1,6 @@
 const moment = require('moment');
-const fs = require('fs');
-const datafile = 'data.json';
-let writing = false, ready = false;
+const io = require('./file-io');
+let ready = false;
 
 
 
@@ -329,7 +328,7 @@ function removeBooking(id, user) {
 			}
 		}
 	}
-	
+
 	// remove booking from bookings database and release the id back to the pool
 	delete bookings[id];
 	bookingpool.push(id);
@@ -375,32 +374,9 @@ function saveToDisk() {
 		'bookingnum': bookingnum,
 		'bookingpool': bookingpool
 	};
-	
-	do {
-		try {
-			writing = true;
-			fs.writeFile(datafile, JSON.stringify(struct, null, 4), 'utf8', function(err) {
-				if (err) {
-					// eslint-disable-next-line no-console
-					console.log('Failed to write JSON to file -', err);
-				}
-			});
-			writing = false;
-		}
-		catch (error) {
-			// eslint-disable-next-line no-console
-			console.log('Failed to write JSON to file -', error);
-		}
-	} while (writing);
+
 	try {
-		writing = true;
-		fs.writeFile(datafile, JSON.stringify(struct, null, 4), 'utf8', function(err) {
-			if (err) {
-				// eslint-disable-next-line no-console
-				console.log('Failed to write JSON to file -', err);
-			}
-		});
-		writing = false;
+		io.write(struct);
 	}
 	catch (error) {
 		// eslint-disable-next-line no-console
@@ -451,8 +427,8 @@ function getState(id) {
 
 let bookings, UserList, bookedTimes, bookingnum, bookingpool;
 try {
-	if (fs.existsSync(datafile)) {
-		let struct = JSON.parse(fs.readFileSync(datafile));
+	if (io.checkFile()) {
+		let struct = JSON.parse(io.read());
 		bookings = struct['bookings'];
 		UserList = struct['UserList'];
 		bookedTimes = struct['bookedTimes'];
