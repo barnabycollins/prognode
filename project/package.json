@@ -4,7 +4,7 @@
   "description": "An app to enable online bookings for Cuth's music room",
   "main": "server.js",
   "scripts": {
-    "test": "del data.json && jest",
+    "test": "jest",
     "start": "node server.js",
     "start-dev": "start nodemon server.js && start watchify static/js/musictimetable.js -o static/js/bundle.js",
     "push-heroku": "cd .. && git subtree push --prefix project heroku master"
@@ -24,5 +24,9 @@
     "supertest": "^4.0.2",
     "tinyify": "^2.5.0",
     "watchify": "^3.11.1"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "coverageReporters": ["html"]
   }
 }

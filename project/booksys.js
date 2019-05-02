@@ -155,17 +155,17 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 
 /**
  * Update user permissions
- * @param {string} admin 
- * @param {string} id 
- * @param {number} perms 
+ * @param {string} admin id of the admin making the change
+ * @param {string} id the id of the user change perms of
+ * @param {string} perms the level to give to the user
  */
 function updateUser(admin, id, perms) {
 	let permittedLevels = ['0', '1', '2', '3', '9'];
-	if (!(perms in permittedLevels)) {
+	if (!(permittedLevels.includes(perms))) {
 		throw 'Invalid permission level';
 	}
 
-	if (UserList[admin].permissionLevel < 9) {
+	if (getPerms(admin) < 9) {
 		throw 'You don\'t have permission to change user permissions';
 	}
 	
@@ -174,10 +174,6 @@ function updateUser(admin, id, perms) {
 	}
 	catch (error) {
 		throw 'Given permission level is not a number';
-	}
-
-	if (perms > 9 || perms < 0) {
-		throw 'Permission level falls outside the range of 0-9';
 	}
 
 	try {
@@ -445,7 +441,14 @@ catch (error) {
 if (!ready) {
 	// initialise structures
 	UserList = {		// object to store registered users
-		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com')
+		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com'),
+
+		// test users
+		'usr-9': new User('USER 9', 9, 'user9@jest.com'),
+		'usr-3': new User('USER 3', 3, 'user3@jest.com'),
+		'usr-2': new User('USER 2', 2, 'user2@jest.com'),
+		'usr-1': new User('USER 1', 1, 'user1@jest.com'),
+		'usr-0': new User('USER 0', 0, 'user0@jest.com')
 	};
 	bookedTimes = {'reg': {}, 'rec': {}};	// object to store what times are booked so we can check for clashes (reg = regular, rec = recurring)
 	bookings = {};		// object to store bookings in

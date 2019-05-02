@@ -103,7 +103,6 @@ app.post('/perms', async function(req, resp) {
 		resp.status(401).send('Error: Failed to verify your Google account');
 		return;
 	}
-
 	try {
 		bs.updateUser(user['sub'], req.body.id, req.body.perms);
 	}

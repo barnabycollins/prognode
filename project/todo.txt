@@ -1,2 +1,4 @@
 batch job: remove old bookings, check bookedTimes every 24 hours (archiving?)
 style submit buttons
+write tests
+finalise docs

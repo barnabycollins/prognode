@@ -1,5 +1,5 @@
 # Music Room Bookings API
-Currently, my college uses a physical notebook for bookings in the music room. I decided to write an electronic web app to offer an alternative.
+Currently, my college (Cuth's) uses a physical notebook for bookings in the music room. I decided to write an electronic web app to offer an alternative.
 
 ## Files included in this package
 - `static/*`: Static content for the web app.
@@ -24,13 +24,13 @@ Returns a list of bookings
 ##### Example response
 ```json
 {
-    "1": { // booking ID
-        "booktime": "2019-05-01T18:46:34.124Z", // time, in ISO 8601, at which the booking was made
-        "date": "04/05/2019",                   // date of booking
-        "STime": "16:00",                       // start time of booking
-        "ETime": "19:00",                       // end time of booking
-        "recurrence": false,                    // whether or not the booking repeats every week
-        "name": "Keith Johnson"                 // name of the booking
+    "1": { /* booking ID */
+        "booktime": "2019-05-01T18:46:34.124Z", /* time, in ISO 8601, at which the booking was made */
+        "date": "04/05/2019",                   /* date of booking */
+        "STime": "16:00",                       /* start time of booking */
+        "ETime": "19:00",                       /* end time of booking */
+        "recurrence": false,                    /* whether or not the booking repeats every week */
+        "name": "Keith Johnson"                 /* name of the booking */
     },
     "2": {
         "booktime": "2019-05-01T18:42:47.125Z",
@@ -72,13 +72,13 @@ Makes a new booking, returns a list of the user's bookings
 ##### Example response
 ```json
 {
-    "1": { // booking ID
-        "booktime": "2019-05-01T18:46:34.124Z", // time, in ISO 8601, at which the booking was made
-        "date": "04/05/2019",                   // date of booking
-        "STime": "16:00",                       // start time of booking
-        "ETime": "19:00",                       // end time of booking
-        "recurrence": false,                    // whether or not the booking repeats every week
-        "name": "Keith Johnson"                 // name of the booking
+    "1": { /* booking ID */
+        "booktime": "2019-05-01T18:46:34.124Z", /* time, in ISO 8601, at which the booking was made */
+        "date": "04/05/2019",                   /* date of booking */
+        "STime": "16:00",                       /* start time of booking */
+        "ETime": "19:00",                       /* end time of booking */
+        "recurrence": false,                    /* whether or not the booking repeats every week */
+        "name": "Keith Johnson"                 /* name of the booking */
     },
     "2": {
         "booktime": "2019-05-01T18:42:47.125Z",
