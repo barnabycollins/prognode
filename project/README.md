@@ -22,7 +22,7 @@ Returns a list of bookings
 - (String, Optional) `token` - Google API token associated with the user whose bookings are required
 
 ##### Example response
-```json
+```js
 {
     "1": { /* booking ID */
         "booktime": "2019-05-01T18:46:34.124Z", /* time, in ISO 8601, at which the booking was made */
@@ -70,7 +70,7 @@ Makes a new booking, returns a list of the user's bookings
 `recurrence` defaults to false, and cannot be set true except by users with permission level 2+
 
 ##### Example response
-```json
+```js
 {
     "1": { /* booking ID */
         "booktime": "2019-05-01T18:46:34.124Z", /* time, in ISO 8601, at which the booking was made */
