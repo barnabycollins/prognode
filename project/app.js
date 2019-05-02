@@ -1,7 +1,7 @@
 const express = require('express');
 const bs = require('./booksys');
 const verify = require('./assets/verify');
-const testbk = require('./assets/testbk');
+//const testbk = require('./assets/testbk');
 const compression = require('compression');
 
 // wait until the booking system is initialised before continuing
@@ -10,13 +10,13 @@ while (!bs.ready) {
 }
 
 // create default bookings to play with
-try {
+/*try {
 	testbk.addTestBookings();
 }
 catch (error) {
 	// eslint-disable-next-line no-console
 	console.log('Failed to create test bookings: ' + error);
-}
+}*/
 
 // NODE SERVER
 const app = express();
