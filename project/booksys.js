@@ -1,5 +1,5 @@
 const moment = require('moment');
-const io = require('./file-io');
+const io = require('./assets/file-io');
 let ready = false;
 
 
@@ -58,21 +58,26 @@ function createBooking(date, STime, ETime, name, user, recurrence) {
 	let email = user['email'];
 	let userName = user['name'];
 	let userPerms = getPerms(id);
-
 	// pull name from user object if necessary
 	if (!name || userPerms < 2) {
 		name = userName;
 	}
 
 	try {
-		var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm').startOf('hour');
+		var start = moment(date + ' ' + STime, 'DD/MM/YYYY HH:mm', true).startOf('hour');
+		if (!start.isValid()) {
+			throw 'INVALID START';
+		}
 	}
 	catch (error) {
 		throw 'Start time or date is not valid: please make sure you are using DD/MM/YYYY and HH:mm';
 	}
 	
 	try {
-		var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm').startOf('hour');
+		var end = moment(date + ' ' + ETime, 'DD/MM/YYYY HH:mm', true).startOf('hour');
+		if (!end.isValid()) {
+			throw 'INVALID END';
+		}
 	}
 	catch (error) {
 		throw 'End time is not valid: please make sure you are using HH:mm';
@@ -168,16 +173,9 @@ function updateUser(admin, id, perms) {
 	if (getPerms(admin) < 9) {
 		throw 'You don\'t have permission to change user permissions';
 	}
-	
-	try {
-		var permissionLevel = parseInt(perms);
-	}
-	catch (error) {
-		throw 'Given permission level is not a number';
-	}
 
 	try {
-		UserList[id].permissionLevel = permissionLevel;
+		UserList[id].permissionLevel = parseInt(perms);
 	}
 	catch (error) {
 		throw 'User does not exist';
@@ -409,7 +407,7 @@ function getPerms(id) {
 
 
 /**
- * DEBUG: returns the full state of the booking system
+ * ADMIN: returns the full state of the booking system
  */
 function getState(id) {
 	let perms = getPerms(id);
@@ -441,13 +439,14 @@ catch (error) {
 if (!ready) {
 	// initialise structures
 	UserList = {		// object to store registered users
-		'116714588086254124711': new User('Barnaby Collins', 9, 'barnstormer322@gmail.com'),
+		// INSERT YOUR DETAILS HERE!!
+		'USERID': new User('NAME', 9, 'EMAIL'),
 
-		// test users
+		// test users - not accessible in normal use
 		'usr-9': new User('USER 9', 9, 'user9@jest.com'),
 		'usr-3': new User('USER 3', 3, 'user3@jest.com'),
 		'usr-2': new User('USER 2', 2, 'user2@jest.com'),
-		'usr-1': new User('USER 1', 1, 'user1@jest.com'),
+		// intentionally skipped user 1 for testing
 		'usr-0': new User('USER 0', 0, 'user0@jest.com')
 	};
 	bookedTimes = {'reg': {}, 'rec': {}};	// object to store what times are booked so we can check for clashes (reg = regular, rec = recurring)

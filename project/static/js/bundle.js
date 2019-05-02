@@ -4972,6 +4972,10 @@ document.addEventListener('DOMContentLoaded', function() {
 				let profile = googleUser.getBasicProfile();
 				idtoken = googleUser.getAuthResponse().id_token;
 				userId = profile.getId();
+				/* eslint-disable no-console */
+				console.log('Your ID Token: ' + idtoken);
+				console.log('Your Google ID: ' + userId);
+				/* eslint-enable no-console */
 
 				// update login button with user details
 				$('#user-img').attr('src', profile.getImageUrl());

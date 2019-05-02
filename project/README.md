@@ -1,18 +1,30 @@
 # Music Room Bookings API
 Currently, my college (Cuth's) uses a physical notebook for bookings in the music room. I decided to write an electronic web app to offer an alternative.
 
+## Testing notes: Please read!
+To add yourself to the user list, insert your ID, name and email to the structure in the dummy line I left at line 443 in `booksys.js`. Then, you can use `npm start` (assuming you've installed the modules) to launch the server, and access the server at [`http://localhost:8080`](http://localhost:8080). As the Google signin API doesn't require a secret, the Google login should work locally. However, I've also deployed a cloud version of the program to [`https://cuths-music-room.herokuapp.com`](https://cuths-music-room.herokuapp.com) if you want to give it a go there.
+For ease of testing, I have made the homepage output your ID Token and ID to the web console when you log in. The **ID** is the identifier for your account, and is the one you should put into UserList, and the **ID token** is what you want to send with any authenticated requests from outside the client (for example when testing the server through Postman).
+
 ## Files included in this package
 - `static/*`: Static content for the web app.
 - `server.js`: The code that launches the Express app defined by `app.js`.
-  - `app.js`: The Express app defining API endpoints. Requires `booksys.js` and `verify.js`.
-    - `booksys.js`: The system for managing bookings.
-    - `verify.js`: Google's signin API, used to authenticate users making requests.
+  - `app.js`: The Express app defining API endpoints. Requires `booksys.js` and `verify.js`. (Test coverage 97.30%)
+    - `booksys.js`: The system for managing bookings. (Test coverage 91.26%)
+    - `assets/*`: Server JS code that is separated for mocking reasons (including `data.json`, a JSON file containing server state)
 - `package.json`: The NPM information for this project.
 - `package-lock.json`: The required modules for the project.
 - `README.md`: This readme.
 # ADD ESLINTRC, TEST SCRIPT
 
 ## API Endpoints
+
+- [GET `/bookings`](####-GET-`/bookings`)
+- [POST `/bookings`](####-POST-`/bookings`)
+- [DELETE `/bookings`](####-DELETE-`/bookings`)
+- [GET `/perms`](####-GET-`/perms`)
+- [POST `/perms`](####-POST-`/perms`)
+- [GET `/all`](####-GET-`/all`)
+
 ### `/bookings`
 
 #### GET `/bookings`
@@ -183,6 +195,93 @@ let response = await fetch('/perms', {
     body: {
         'id': '80',
         'perms': '9'
+    }
+});
+```
+
+### `/all`
+
+#### GET `/all`
+Returns the state of the server
+
+##### Headers
+- (String, Required) `token` - Google API token associated with an admin (permission level 9)
+
+##### Example Response
+```json
+{
+    "bookings": {
+        "1": {
+            "booktime": "2019-05-02T12:36:29.642Z",
+            "date": "03/05/2019",
+            "STime": "10:00",
+            "ETime": "12:00",
+            "id": "80",
+            "recurrence": false,
+            "name": "Steve"
+        },
+        "2": {
+            "booktime": "2019-05-02T12:36:29.644Z",
+            "date": "04/05/2019",
+            "STime": "16:00",
+            "ETime": "19:00",
+            "id": "100",
+            "recurrence": false,
+            "name": "Keith Jenkins"
+        },
+        "3": {
+            "booktime": "2019-05-02T12:36:29.645Z",
+            "date": "02/05/2019",
+            "STime": "20:00",
+            "ETime": "22:00",
+            "id": "100",
+            "recurrence": true,
+            "name": "Recurring booking"
+        }
+    },
+    "bookedTimes": {
+        "reg": {
+            "2019": {
+                "123": {
+                    "10": 1,
+                    "11": 1
+                },
+                "124": {
+                    "16": 2,
+                    "17": 2,
+                    "18": 2
+                }
+            }
+        },
+        "rec": {
+            "4": {
+                "20": 3,
+                "21": 3
+            }
+        }
+    },
+    "bookingnum": 4,
+    "bookingpool": [],
+    "UserList": {
+        "80": {
+            "name": "Steve",
+            "permissionLevel": 0,
+            "email": "steve@stevecorp.org"
+        },
+        "100": {
+            "name": "Keith Jenkins",
+            "permissionLevel": 9,
+            "email": "keith@keithzone.com"
+        }
+    }
+}
+```
+
+##### Sample call
+```js
+let response = await fetch('/all', {
+    headers: {
+        'token': idtoken
     }
 });
 ```

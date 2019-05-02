@@ -1,7 +1,7 @@
 const express = require('express');
 const bs = require('./booksys');
-const verify = require('./verify');
-const testbk = require('./testbk');
+const verify = require('./assets/verify');
+const testbk = require('./assets/testbk');
 const compression = require('compression');
 
 // wait until the booking system is initialised before continuing
@@ -55,7 +55,7 @@ app.post('/bookings', async function(req, resp) {
 		bs.createBooking(req.body.date, req.body.stime, req.body.etime, req.body.name, user, req.body.recurrence);
 	}
 	catch(error) {
-		resp.status(409).send('Error: failed to create your booking - ' + error);
+		resp.status(400).send('Error: failed to create your booking - ' + error);
 		return;
 	}
 	resp.status(201).type('json').send(JSON.stringify(bs.getBookings(user['sub']), null, 4));
@@ -75,7 +75,7 @@ app.delete('/bookings', async function(req, resp) {
 		bs.removeBooking(req.body.id, id);
 	}
 	catch (error) {
-		resp.status(401).send('Error: ' + error);
+		resp.status(400).send('Error: ' + error);
 		return;
 	}
 	resp.status(204).send('Successfully removed booking ' + req.header('id'));

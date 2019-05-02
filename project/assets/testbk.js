@@ -1,4 +1,4 @@
-const bs = require('./booksys');
+const bs = require('../booksys');
 
 function addTestBookings() {
 	bs.createBooking('03/05/2019', '10:00', '12:00', 'steve', {'sub': '80', 'email': 'steve@stevecorp.org', 'name': 'STEPHEN'}, false);
