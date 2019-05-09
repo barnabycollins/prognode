@@ -4,6 +4,7 @@
   "description": "An app to enable online bookings for Cuth's music room",
   "main": "server.js",
   "scripts": {
+    "pretest": "eslint app.js booksys.js assets",
     "test": "jest",
     "start": "node server.js",
     "start-dev": "start nodemon server.js && start watchify static/js/musictimetable.js -o static/js/bundle.js",
