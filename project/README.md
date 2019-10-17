@@ -16,7 +16,6 @@ For ease of testing, I have made the homepage output your ID Token and ID to the
 - `README.md`: This readme.
 - `app.test.js`: The Jest test script for the project.
 - `eslintrc.json`: The ESLint config for the project.
-# ADD ESLINTRC, TEST SCRIPT
 
 ## API Endpoints
 
